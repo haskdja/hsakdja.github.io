@@ -7,72 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 인증 모달 -->
-    <div class="auth-modal" id="auth-modal">
-        <div class="auth-container">
-            <div class="auth-header">
-                <h1 class="auth-title">AI 컴패니언</h1>
-                <p class="auth-subtitle">가상 친구와 함께하는 특별한 시간</p>
-            </div>
-
-            <!-- 설정 패널 -->
-            <div class="settings-panel">
-                <h3 class="settings-title">Gemini API 설정</h3>
-                <input type="password" class="api-input" id="api-key-input" placeholder="Gemini API 키를 입력하세요">
-                <div class="api-status warning" id="api-status">
-                    API 키가 필요합니다. Google AI Studio에서 무료로 받을 수 있습니다.
-                </div>
-            </div>
-
-            <!-- 로그인 폼 -->
-            <form class="auth-form" id="login-form">
-                <div class="form-group">
-                    <label class="form-label">이메일</label>
-                    <input type="email" class="form-input" id="login-email" placeholder="이메일을 입력하세요" required>
-                    <div class="error-message" id="login-email-error"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">비밀번호</label>
-                    <input type="password" class="form-input" id="login-password" placeholder="비밀번호를 입력하세요" required>
-                    <div class="error-message" id="login-password-error"></div>
-                </div>
-                <button type="submit" class="auth-button">로그인</button>
-            </form>
-
-            <!-- 회원가입 폼 -->
-            <form class="auth-form" id="signup-form" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">이름</label>
-                    <input type="text" class="form-input" id="signup-name" placeholder="이름을 입력하세요" required>
-                    <div class="error-message" id="signup-name-error"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">이메일</label>
-                    <input type="email" class="form-input" id="signup-email" placeholder="이메일을 입력하세요" required>
-                    <div class="error-message" id="signup-email-error"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">비밀번호</label>
-                    <input type="password" class="form-input" id="signup-password" placeholder="비밀번호를 입력하세요 (8자 이상)" required minlength="8">
-                    <div class="error-message" id="signup-password-error"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">비밀번호 확인</label>
-                    <input type="password" class="form-input" id="signup-confirm" placeholder="비밀번호를 다시 입력하세요" required>
-                    <div class="error-message" id="signup-confirm-error"></div>
-                </div>
-                <button type="submit" class="auth-button">회원가입</button>
-            </form>
-
-            <div class="auth-switch">
-                <span id="auth-switch-text">계정이 없으신가요?</span>
-                <a href="#" class="auth-switch-link" id="auth-switch-link">회원가입</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- 채팅 컨테이너 -->
-    <div class="chat-container" id="chat-container">
+    <div class="chat-container">
         <div class="header">
             <div class="character-info">
                 <div class="character-avatar">
@@ -80,13 +15,8 @@
                 </div>
                 <div class="character-details">
                     <h2 id="character-name">Ani</h2>
-                    <div class="character-status">온라인 • AI 기반 컴패니언</div>
+                    <div class="character-status">온라인 • 친절한 AI 컴패니언</div>
                 </div>
-            </div>
-            <div class="user-info">
-                <div class="user-avatar" id="user-avatar">👤</div>
-                <div class="user-name" id="user-name">사용자</div>
-                <button class="logout-btn" id="logout-btn">로그아웃</button>
             </div>
         </div>
 
@@ -103,10 +33,11 @@
         </div>
 
         <div class="chat-messages" id="chat-messages">
-            <div class="welcome-message">
-                <h3>🎉 환영합니다!</h3>
-                <p>AI 컴패니언과 함께하는 즐거운 대화를 시작해보세요!</p>
-                <small>Google Gemini AI가 실제 대화를 생성합니다.</small>
+            <div class="message ai">
+                <div class="message-avatar">👧</div>
+                <div class="message-content">
+                    안녕하세요! 저는 Ani예요~ 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕
+                </div>
             </div>
         </div>
 
@@ -126,132 +57,205 @@
     </div>
 
     <script>
-        // 데이터 저장소 (메모리 기반)
-        let appUsers = {};
-        let currentUser = null;
-
-        class AuthSystem {
+        class AICompanion {
             constructor() {
-                this.isLoginMode = true;
+                this.currentCharacter = 'ani';
+                this.characters = {
+                    ani: {
+                        name: 'Ani',
+                        emoji: '👧',
+                        personality: 'cheerful',
+                        greeting: '안녕하세요! 저는 Ani예요~ 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕'
+                    },
+                    yuki: {
+                        name: 'Yuki',
+                        emoji: '❄️',
+                        personality: 'calm',
+                        greeting: '안녕하세요. 저는 Yuki입니다. 조용한 대화를 나누면서 편안한 시간을 보내요.'
+                    },
+                    kai: {
+                        name: 'Kai',
+                        emoji: '🤖',
+                        personality: 'intelligent',
+                        greeting: '안녕하세요! Kai입니다. 궁금한 것이 있으시면 언제든 물어보세요!'
+                    }
+                };
                 
                 this.initializeElements();
                 this.bindEvents();
-                this.loadAPIKey();
+                this.loadChatHistory();
             }
 
             initializeElements() {
-                this.authModal = document.getElementById('auth-modal');
-                this.chatContainer = document.getElementById('chat-container');
-                this.loginForm = document.getElementById('login-form');
-                this.signupForm = document.getElementById('signup-form');
-                this.authSwitchText = document.getElementById('auth-switch-text');
-                this.authSwitchLink = document.getElementById('auth-switch-link');
-                this.userName = document.getElementById('user-name');
-                this.userAvatar = document.getElementById('user-avatar');
-                this.logoutBtn = document.getElementById('logout-btn');
-                this.apiKeyInput = document.getElementById('api-key-input');
-                this.apiStatus = document.getElementById('api-status');
+                this.chatMessages = document.getElementById('chat-messages');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.typingIndicator = document.getElementById('typing-indicator');
+                this.characterName = document.getElementById('character-name');
+                this.characterEmoji = document.getElementById('character-emoji');
             }
 
             bindEvents() {
-                this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-                this.signupForm.addEventListener('submit', (e) => this.handleSignup(e));
-                this.authSwitchLink.addEventListener('click', (e) => this.toggleAuthMode(e));
-                this.logoutBtn.addEventListener('click', () => this.logout());
-                this.apiKeyInput.addEventListener('input', () => this.handleAPIKeyChange());
-                this.apiKeyInput.addEventListener('blur', () => this.saveAPIKey());
-            }
-
-            loadAPIKey() {
-                const savedKey = window.geminiApiKey || '';
-                if (savedKey) {
-                    this.apiKeyInput.value = savedKey;
-                    this.updateAPIStatus('success', 'API 키가 설정되었습니다.');
-                }
-            }
-
-            handleAPIKeyChange() {
-                const apiKey = this.apiKeyInput.value.trim();
-                if (apiKey.length === 0) {
-                    this.updateAPIStatus('warning', 'API 키가 필요합니다.');
-                } else if (apiKey.length < 20) {
-                    this.updateAPIStatus('error', 'API 키가 너무 짧습니다.');
-                } else {
-                    this.updateAPIStatus('success', 'API 키가 설정되었습니다.');
-                }
-            }
-
-            saveAPIKey() {
-                const apiKey = this.apiKeyInput.value.trim();
-                if (apiKey.length > 20) {
-                    window.geminiApiKey = apiKey;
-                }
-            }
-
-            updateAPIStatus(type, message) {
-                this.apiStatus.className = `api-status ${type}`;
-                this.apiStatus.textContent = message;
-            }
-
-            toggleAuthMode(e) {
-                e.preventDefault();
-                this.isLoginMode = !this.isLoginMode;
-                
-                if (this.isLoginMode) {
-                    this.loginForm.style.display = 'flex';
-                    this.signupForm.style.display = 'none';
-                    this.authSwitchText.textContent = '계정이 없으신가요?';
-                    this.authSwitchLink.textContent = '회원가입';
-                } else {
-                    this.loginForm.style.display = 'none';
-                    this.signupForm.style.display = 'flex';
-                    this.authSwitchText.textContent = '이미 계정이 있으신가요?';
-                    this.authSwitchLink.textContent = '로그인';
-                }
-                
-                this.clearErrors();
-            }
-
-            clearErrors() {
-                document.querySelectorAll('.error-message').forEach(error => {
-                    error.textContent = '';
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
                 });
-                document.querySelectorAll('.form-input').forEach(input => {
-                    input.classList.remove('error');
+
+                // API 토글 버튼
+                this.apiToggle.addEventListener('click', () => {
+                    this.useAPI = !this.useAPI;
+                    this.apiToggle.textContent = this.useAPI ? '🤖' : '💬';
+                    this.apiToggle.title = this.useAPI ? 'AI API 모드 (ON)' : '로컬 모드 (OFF)';
+                    
+                    const status = this.useAPI ? 'AI API 연결됨' : '오프라인 모드';
+                    this.addMessage('system', `${status}으로 전환되었습니다.`);
+                });
+
+                // 캐릭터 선택
+                document.querySelectorAll('.character-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        this.switchCharacter(e.target.dataset.character);
+                    });
                 });
             }
 
-            showError(fieldId, message) {
-                const field = document.getElementById(fieldId);
-                const errorElement = document.getElementById(fieldId + '-error');
+            switchCharacter(characterKey) {
+                // 활성 캐릭터 변경
+                document.querySelectorAll('.character-option').forEach(opt => 
+                    opt.classList.remove('active'));
+                document.querySelector(`[data-character="${characterKey}"]`).classList.add('active');
+
+                this.currentCharacter = characterKey;
+                const character = this.characters[characterKey];
                 
-                if (field && errorElement) {
-                    field.classList.add('error');
-                    errorElement.textContent = message;
-                }
+                // UI 업데이트
+                this.characterName.textContent = character.name;
+                this.characterEmoji.textContent = character.emoji;
+                
+                // 새로운 인사말 추가
+                this.addMessage('ai', character.greeting);
+                this.saveChatHistory();
             }
 
-            validateEmail(email) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return re.test(email);
+            sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // 사용자 메시지 추가
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                
+                // AI 응답 시뮬레이션
+                this.simulateAIResponse(message);
+                this.saveChatHistory();
             }
 
-            handleLogin(e) {
-                e.preventDefault();
-                this.clearErrors();
+            addMessage(sender, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
                 
-                const email = document.getElementById('login-email').value.trim();
-                const password = document.getElementById('login-password').value;
+                const character = this.characters[this.currentCharacter];
+                const emoji = sender === 'ai' ? character.emoji : '👤';
                 
-                let isValid = true;
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${emoji}</div>
+                    <div class="message-content">${content}</div>
+                `;
                 
-                if (!email) {
-                    this.showError('login-email', '이메일을 입력해주세요.');
-                    isValid = false;
-                } else if (!this.validateEmail(email)) {
-                    this.showError('login-email', '올바른 이메일 형식이 아닙니다.');
-                    isValid = false;
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            simulateAIResponse(userMessage) {
+                // 타이핑 인디케이터 표시
+                this.showTypingIndicator();
+                
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    const response = this.generateResponse(userMessage);
+                    this.addMessage('ai', response);
+                    this.saveChatHistory();
+                }, 1000 + Math.random() * 2000);
+            }
+
+            generateResponse(userMessage) {
+                const character = this.characters[this.currentCharacter];
+                const responses = this.getCharacterResponses(character.personality, userMessage);
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            getCharacterResponses(personality, userMessage) {
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // 공통 키워드 응답
+                if (lowerMessage.includes('안녕') || lowerMessage.includes('하이')) {
+                    return personality === 'cheerful' ? 
+                        ['안녕하세요! 반가워요~ 😊', '하이하이! 오늘도 좋은 하루에요! ✨'] :
+                        personality === 'calm' ? 
+                        ['안녕하세요. 편안한 하루 되세요.', '반갑습니다. 좋은 시간 보내고 계신가요?'] :
+                        ['안녕하세요! 무엇을 도와드릴까요?', '반갑습니다. 궁금한 것이 있으시면 말씀해 주세요.'];
                 }
                 
-                if (!password) {
-                    this.showError('login-password', '비밀번호를 입력
+                if (lowerMessage.includes('날씨')) {
+                    return personality === 'cheerful' ? 
+                        ['오늘 날씨 정말 좋죠! 밖에 나가고 싶어져요~ ☀️', '날씨에 따라 기분도 달라지는 것 같아요! 💕'] :
+                        personality === 'calm' ? 
+                        ['날씨가 마음에 영향을 주는 것 같아요.', '계절의 변화를 느끼며 살아가는 것도 좋은 것 같아요.'] :
+                        ['날씨 정보가 필요하시면 날씨 앱을 확인해보세요!', '기상청 데이터를 통해 정확한 정보를 얻으실 수 있어요.'];
+                }
+                
+                // 기본 응답
+                const defaultResponses = {
+                    cheerful: [
+                        '와! 정말 재미있는 얘기네요! 더 들려주세요~ 😄',
+                        '그런 일이 있었군요! 저도 비슷한 경험이... 아, 제가 AI라 그런 경험은 없겠네요 😅',
+                        '오늘도 즐거운 하루 보내세요! 항상 응원할게요~ 💕',
+                        '우와~ 그거 정말 신기해요! 더 자세히 알려주세요! ✨'
+                    ],
+                    calm: [
+                        '그렇군요. 차분히 생각해보시는 것이 좋겠어요.',
+                        '때로는 조용한 시간이 필요할 때가 있어요.',
+                        '마음이 편안해지는 시간을 가지시길 바라요.',
+                        '깊이 생각해볼 만한 이야기네요.'
+                    ],
+                    intelligent: [
+                        '흥미로운 관점이네요. 다른 각도에서 생각해보면 어떨까요?',
+                        '그에 대해 더 자세한 정보가 필요하시면 도움을 드릴 수 있어요.',
+                        '논리적으로 접근해보면 좋은 결과가 있을 것 같아요.',
+                        '데이터나 근거가 있다면 더 정확한 답변을 드릴 수 있어요.'
+                    ]
+                };
+                
+                return defaultResponses[personality] || defaultResponses.cheerful;
+            }
+
+            showTypingIndicator() {
+                const character = this.characters[this.currentCharacter];
+                document.querySelector('#typing-indicator .message-avatar').textContent = character.emoji;
+                this.typingIndicator.style.display = 'flex';
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                this.typingIndicator.style.display = 'none';
+            }
+
+            saveChatHistory() {
+                // 실제 구현에서는 로컬스토리지나 서버에 저장
+                // 여기서는 시뮬레이션만
+                console.log('채팅 기록 저장됨');
+            }
+
+            loadChatHistory() {
+                // 실제 구현에서는 저장된 채팅 기록을 불러옴
+                console.log('채팅 기록 로드됨');
+            }
+        }
+
+        // 앱 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            new AICompanion();
+        });
+    </script>
+</body>
+</html>
