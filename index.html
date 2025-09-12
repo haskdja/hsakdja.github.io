@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 컴패니언 - 가상 친구와 채팅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .character-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff9a9e 0%, #fecfef 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 3px solid white;
+        }
+
+        .character-details h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .character-status {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9ff;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.ai .message-content {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .character-selector {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .character-option {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .character-option.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .character-option:hover {
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <div class="character-info">
+                <div class="character-avatar">
+                    <span id="character-emoji">👧</span>
+                </div>
+                <div class="character-details">
+                    <h2 id="character-name">Ani</h2>
+                    <div class="character-status">온라인 • 친절한 AI 컴패니언</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="character-selector">
+            <div class="character-option active" data-character="ani">
+                👧 Ani (활발한 소녀)
+            </div>
+            <div class="character-option" data-character="yuki">
+                ❄️ Yuki (차분한 친구)
+            </div>
+            <div class="character-option" data-character="kai">
+                🤖 Kai (똑똑한 조수)
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="message ai">
+                <div class="message-avatar">👧</div>
+                <div class="message-content">
+                    안녕하세요! 저는 Ani예요~ 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="message-avatar">👧</div>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" class="message-input" id="message-input" placeholder="메시지를 입력하세요..." maxlength="500">
+            <button class="send-button" id="send-button">전송</button>
+        </div>
+    </div>
+
+    <script>
+        class AICompanion {
+            constructor() {
+                this.currentCharacter = 'ani';
+                this.characters = {
+                    ani: {
+                        name: 'Ani',
+                        emoji: '👧',
+                        personality: 'cheerful',
+                        greeting: '안녕하세요! 저는 Ani예요~ 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕'
+                    },
+                    yuki: {
+                        name: 'Yuki',
+                        emoji: '❄️',
+                        personality: 'calm',
+                        greeting: '안녕하세요. 저는 Yuki입니다. 조용한 대화를 나누면서 편안한 시간을 보내요.'
+                    },
+                    kai: {
+                        name: 'Kai',
+                        emoji: '🤖',
+                        personality: 'intelligent',
+                        greeting: '안녕하세요! Kai입니다. 궁금한 것이 있으시면 언제든 물어보세요!'
+                    }
+                };
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.loadChatHistory();
+            }
+
+            initializeElements() {
+                this.chatMessages = document.getElementById('chat-messages');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.typingIndicator = document.getElementById('typing-indicator');
+                this.characterName = document.getElementById('character-name');
+                this.characterEmoji = document.getElementById('character-emoji');
+            }
+
+            bindEvents() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+
+                // 캐릭터 선택
+                document.querySelectorAll('.character-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        this.switchCharacter(e.target.dataset.character);
+                    });
+                });
+            }
+
+            switchCharacter(characterKey) {
+                // 활성 캐릭터 변경
+                document.querySelectorAll('.character-option').forEach(opt => 
+                    opt.classList.remove('active'));
+                document.querySelector(`[data-character="${characterKey}"]`).classList.add('active');
+
+                this.currentCharacter = characterKey;
+                const character = this.characters[characterKey];
+                
+                // UI 업데이트
+                this.characterName.textContent = character.name;
+                this.characterEmoji.textContent = character.emoji;
+                
+                // 새로운 인사말 추가
+                this.addMessage('ai', character.greeting);
+                this.saveChatHistory();
+            }
+
+            sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // 사용자 메시지 추가
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                
+                // AI 응답 시뮬레이션
+                this.simulateAIResponse(message);
+                this.saveChatHistory();
+            }
+
+            addMessage(sender, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const character = this.characters[this.currentCharacter];
+                const emoji = sender === 'ai' ? character.emoji : '👤';
+                
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${emoji}</div>
+                    <div class="message-content">${content}</div>
+                `;
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            simulateAIResponse(userMessage) {
+                // 타이핑 인디케이터 표시
+                this.showTypingIndicator();
+                
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    const response = this.generateResponse(userMessage);
+                    this.addMessage('ai', response);
+                    this.saveChatHistory();
+                }, 1000 + Math.random() * 2000);
+            }
+
+            generateResponse(userMessage) {
+                const character = this.characters[this.currentCharacter];
+                const responses = this.getCharacterResponses(character.personality, userMessage);
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            getCharacterResponses(personality, userMessage) {
+                const lowerMessage = userMessage.toLowerCase();
+                
+                // 공통 키워드 응답
+                if (lowerMessage.includes('안녕') || lowerMessage.includes('하이')) {
+                    return personality === 'cheerful' ? 
+                        ['안녕하세요! 반가워요~ 😊', '하이하이! 오늘도 좋은 하루에요! ✨'] :
+                        personality === 'calm' ? 
+                        ['안녕하세요. 편안한 하루 되세요.', '반갑습니다. 좋은 시간 보내고 계신가요?'] :
+                        ['안녕하세요! 무엇을 도와드릴까요?', '반갑습니다. 궁금한 것이 있으시면 말씀해 주세요.'];
+                }
+                
+                if (lowerMessage.includes('날씨')) {
+                    return personality === 'cheerful' ? 
+                        ['오늘 날씨 정말 좋죠! 밖에 나가고 싶어져요~ ☀️', '날씨에 따라 기분도 달라지는 것 같아요! 💕'] :
+                        personality === 'calm' ? 
+                        ['날씨가 마음에 영향을 주는 것 같아요.', '계절의 변화를 느끼며 살아가는 것도 좋은 것 같아요.'] :
+                        ['날씨 정보가 필요하시면 날씨 앱을 확인해보세요!', '기상청 데이터를 통해 정확한 정보를 얻으실 수 있어요.'];
+                }
+                
+                // 기본 응답
+                const defaultResponses = {
+                    cheerful: [
+                        '와! 정말 재미있는 얘기네요! 더 들려주세요~ 😄',
+                        '그런 일이 있었군요! 저도 비슷한 경험이... 아, 제가 AI라 그런 경험은 없겠네요 😅',
+                        '오늘도 즐거운 하루 보내세요! 항상 응원할게요~ 💕',
+                        '우와~ 그거 정말 신기해요! 더 자세히 알려주세요! ✨'
+                    ],
+                    calm: [
+                        '그렇군요. 차분히 생각해보시는 것이 좋겠어요.',
+                        '때로는 조용한 시간이 필요할 때가 있어요.',
+                        '마음이 편안해지는 시간을 가지시길 바라요.',
+                        '깊이 생각해볼 만한 이야기네요.'
+                    ],
+                    intelligent: [
+                        '흥미로운 관점이네요. 다른 각도에서 생각해보면 어떨까요?',
+                        '그에 대해 더 자세한 정보가 필요하시면 도움을 드릴 수 있어요.',
+                        '논리적으로 접근해보면 좋은 결과가 있을 것 같아요.',
+                        '데이터나 근거가 있다면 더 정확한 답변을 드릴 수 있어요.'
+                    ]
+                };
+                
+                return defaultResponses[personality] || defaultResponses.cheerful;
+            }
+
+            showTypingIndicator() {
+                const character = this.characters[this.currentCharacter];
+                document.querySelector('#typing-indicator .message-avatar').textContent = character.emoji;
+                this.typingIndicator.style.display = 'flex';
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                this.typingIndicator.style.display = 'none';
+            }
+
+            saveChatHistory() {
+                // 실제 구현에서는 로컬스토리지나 서버에 저장
+                // 여기서는 시뮬레이션만
+                console.log('채팅 기록 저장됨');
+            }
+
+            loadChatHistory() {
+                // 실제 구현에서는 저장된 채팅 기록을 불러옴
+                console.log('채팅 기록 로드됨');
+            }
+        }
+
+        // 앱 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            new AICompanion();
+        });
+    </script>
+</body>
+</html>
