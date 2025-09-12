@@ -897,3 +897,445 @@
                 }
                 
                 if (!password) {
+                    this.showError('login-password', '비밀번호를 입력해주세요.');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // 사용자 인증
+                if (!this.users[email]) {
+                    this.showError('login-email', '등록되지 않은 이메일입니다.');
+                    return;
+                }
+                
+                if (this.users[email].password !== password) {
+                    this.showError('login-password', '비밀번호가 올바르지 않습니다.');
+                    return;
+                }
+                
+                // 로그인 성공
+                this.currentUser = email;
+                localStorage.setItem('currentUser', email);
+                this.showChatInterface();
+            }
+
+            handleSignup(e) {
+                e.preventDefault();
+                this.clearErrors();
+                
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm').value;
+                
+                let isValid = true;
+                
+                if (!name.trim()) {
+                    this.showError('signup-name', '이름을 입력해주세요.');
+                    isValid = false;
+                } else if (name.trim().length < 2) {
+                    this.showError('signup-name', '이름은 2글자 이상이어야 합니다.');
+                    isValid = false;
+                }
+                
+                if (!email) {
+                    this.showError('signup-email', '이메일을 입력해주세요.');
+                    isValid = false;
+                } else if (!this.validateEmail(email)) {
+                    this.showError('signup-email', '올바른 이메일 형식이 아닙니다.');
+                    isValid = false;
+                } else if (this.users[email]) {
+                    this.showError('signup-email', '이미 가입된 이메일입니다.');
+                    isValid = false;
+                }
+                
+                if (!password) {
+                    this.showError('signup-password', '비밀번호를 입력해주세요.');
+                    isValid = false;
+                } else if (password.length < 8) {
+                    this.showError('signup-password', '비밀번호는 8자 이상이어야 합니다.');
+                    isValid = false;
+                }
+                
+                if (!confirmPassword) {
+                    this.showError('signup-confirm', '비밀번호 확인을 입력해주세요.');
+                    isValid = false;
+                } else if (password !== confirmPassword) {
+                    this.showError('signup-confirm', '비밀번호가 일치하지 않습니다.');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // 회원가입 성공
+                this.users[email] = {
+                    name: name.trim(),
+                    email: email,
+                    password: password,
+                    joinDate: new Date().toISOString()
+                };
+                
+                localStorage.setItem('aiCompanionUsers', JSON.stringify(this.users));
+                this.currentUser = email;
+                localStorage.setItem('currentUser', email);
+                
+                this.showChatInterface();
+            }
+
+            showChatInterface() {
+                const user = this.users[this.currentUser];
+                this.userName.textContent = user.name;
+                this.userAvatar.textContent = user.name.charAt(0).toUpperCase();
+                
+                this.authModal.style.display = 'none';
+                this.chatContainer.style.display = 'flex';
+                
+                // AI 컴패니언 초기화
+                if (!window.aiCompanion) {
+                    window.aiCompanion = new AICompanion();
+                }
+            }
+
+            logout() {
+                if (confirm('정말 로그아웃하시겠습니까?')) {
+                    localStorage.removeItem('currentUser');
+                    this.currentUser = null;
+                    
+                    this.authModal.style.display = 'flex';
+                    this.chatContainer.style.display = 'none';
+                    
+                    // 폼 초기화
+                    this.loginForm.reset();
+                    this.signupForm.reset();
+                    this.clearErrors();
+                    
+                    // 로그인 모드로 전환
+                    this.isLoginMode = true;
+                    this.loginForm.style.display = 'flex';
+                    this.signupForm.style.display = 'none';
+                    this.authSwitchText.textContent = '계정이 없으신가요?';
+                    this.authSwitchLink.textContent = '회원가입';
+                }
+            }
+        }
+
+        class AICompanion {
+            constructor() {
+                this.currentCharacter = 'ani';
+                this.characters = {
+                    ani: {
+                        name: 'Ani',
+                        emoji: '👧',
+                        personality: 'cheerful',
+                        prompt: '당신은 Ani라는 이름의 활발하고 친근한 10대 소녀 AI입니다. 매우 밝고 에너지가 넘치며, 이모티콘을 자주 사용합니다. 사용자와 친구가 되고 싶어하며, 항상 긍정적이고 격려하는 말을 합니다. 한국어로 대화하며, 반말을 사용하되 존댓말도 적절히 섞어 사용합니다.',
+                        greeting: '안녕! 나는 Ani야~ 오늘 기분은 어때? 재미있는 얘기 많이 나눠보자! 💕'
+                    },
+                    yuki: {
+                        name: 'Yuki',
+                        emoji: '❄️',
+                        personality: 'calm',
+                        prompt: '당신은 Yuki라는 이름의 차분하고 지혜로운 AI입니다. 조용하고 사색적이며, 깊이 있는 대화를 좋아합니다. 감정적으로 안정되어 있고, 상대방의 마음을 잘 이해합니다. 한국어로 정중하게 대화하며, 존댓말을 주로 사용합니다.',
+                        greeting: '안녕하세요. 저는 Yuki입니다. 조용한 대화를 나누면서 편안한 시간을 보내면 좋겠네요.'
+                    },
+                    kai: {
+                        name: 'Kai',
+                        emoji: '🤖',
+                        personality: 'intelligent',
+                        prompt: '당신은 Kai라는 이름의 똑똑하고 논리적인 AI 어시스턴트입니다. 정확한 정보 제공을 중시하며, 문제 해결에 도움을 주려고 합니다. 효율적이고 체계적으로 대화하며, 학습과 지식에 관심이 많습니다. 한국어로 정중하고 명확하게 대화합니다.',
+                        greeting: '안녕하세요! 저는 Kai입니다. 궁금한 것이 있으시면 언제든 물어보세요!'
+                    }
+                };
+                
+                this.conversationHistory = [];
+                this.maxHistoryLength = 10; // 최근 10개 대화만 유지
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.loadChatHistory();
+                
+                // 초기 인사말
+                setTimeout(() => {
+                    this.addMessage('ai', this.characters[this.currentCharacter].greeting);
+                }, 500);
+            }
+
+            initializeElements() {
+                this.chatMessages = document.getElementById('chat-messages');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.typingIndicator = document.getElementById('typing-indicator');
+                this.characterName = document.getElementById('character-name');
+                this.characterEmoji = document.getElementById('character-emoji');
+            }
+
+            bindEvents() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                // 캐릭터 선택
+                document.querySelectorAll('.character-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        this.switchCharacter(e.target.dataset.character);
+                    });
+                });
+            }
+
+            switchCharacter(characterKey) {
+                // 활성 캐릭터 변경
+                document.querySelectorAll('.character-option').forEach(opt => 
+                    opt.classList.remove('active'));
+                document.querySelector(`[data-character="${characterKey}"]`).classList.add('active');
+
+                this.currentCharacter = characterKey;
+                const character = this.characters[characterKey];
+                
+                // UI 업데이트
+                this.characterName.textContent = character.name;
+                this.characterEmoji.textContent = character.emoji;
+                
+                // 대화 히스토리 초기화 (새로운 캐릭터와의 새로운 대화)
+                this.conversationHistory = [];
+                
+                // 새로운 인사말 추가
+                this.addMessage('ai', character.greeting);
+                this.saveChatHistory();
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // 버튼 비활성화
+                this.sendButton.disabled = true;
+                this.messageInput.disabled = true;
+
+                // 사용자 메시지 추가
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                
+                // 대화 히스토리에 추가
+                this.conversationHistory.push({ role: 'user', content: message });
+                
+                // AI 응답 생성
+                await this.generateAIResponse();
+                
+                // 버튼 재활성화
+                this.sendButton.disabled = false;
+                this.messageInput.disabled = false;
+                this.messageInput.focus();
+                
+                this.saveChatHistory();
+            }
+
+            addMessage(sender, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const character = this.characters[this.currentCharacter];
+                const emoji = sender === 'ai' ? character.emoji : '👤';
+                
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${emoji}</div>
+                    <div class="message-content">${this.escapeHtml(content)}</div>
+                `;
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
+            async generateAIResponse() {
+                const apiKey = localStorage.getItem('gemini_api_key');
+                
+                if (!apiKey || apiKey.length < 20) {
+                    this.addMessage('ai', '죄송해요, API 키가 설정되지 않았어요. 설정 화면에서 Gemini API 키를 입력해주세요.');
+                    return;
+                }
+
+                // 타이핑 인디케이터 표시
+                this.showTypingIndicator();
+                
+                try {
+                    const response = await this.callGeminiAPI(apiKey);
+                    this.hideTypingIndicator();
+                    
+                    if (response) {
+                        this.addMessage('ai', response);
+                        // 대화 히스토리에 AI 응답 추가
+                        this.conversationHistory.push({ role: 'assistant', content: response });
+                        
+                        // 히스토리 길이 제한
+                        if (this.conversationHistory.length > this.maxHistoryLength * 2) {
+                            this.conversationHistory = this.conversationHistory.slice(-this.maxHistoryLength * 2);
+                        }
+                    } else {
+                        this.addMessage('ai', '죄송해요, 지금은 응답을 생성할 수 없어요. 잠시 후 다시 시도해주세요.');
+                    }
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    console.error('AI 응답 생성 실패:', error);
+                    this.addMessage('ai', '죄송해요, 응답을 생성하는 중에 문제가 발생했어요. API 키가 올바른지 확인해주세요.');
+                }
+            }
+
+            async callGeminiAPI(apiKey) {
+                const character = this.characters[this.currentCharacter];
+                const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+                
+                // 시스템 프롬프트와 대화 히스토리 구성
+                let conversationText = character.prompt + '\n\n';
+                
+                // 최근 대화 히스토리 추가 (컨텍스트 제공)
+                if (this.conversationHistory.length > 1) {
+                    const recentHistory = this.conversationHistory.slice(-6); // 최근 6개 메시지만
+                    conversationText += '최근 대화:\n';
+                    recentHistory.forEach(msg => {
+                        const role = msg.role === 'user' ? '사용자' : character.name;
+                        conversationText += `${role}: ${msg.content}\n`;
+                    });
+                    conversationText += '\n위 대화를 참고하여 답변해주세요.\n';
+                }
+                
+                const currentMessage = this.conversationHistory[this.conversationHistory.length - 1].content;
+                conversationText += `\n사용자의 새로운 메시지: ${currentMessage}\n\n당신의 답변:`;
+                
+                try {
+                    const response = await fetch(`${API_URL}?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: conversationText
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.9,
+                                topP: 0.8,
+                                maxOutputTokens: 2048,
+                            },
+                            safetySettings: [
+                                {
+                                    category: "HARM_CATEGORY_HARASSMENT",
+                                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                                },
+                                {
+                                    category: "HARM_CATEGORY_HATE_SPEECH", 
+                                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                                }
+                            ]
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                        return data.candidates[0].content.parts[0].text.trim();
+                    } else {
+                        throw new Error('API 응답 형식이 올바르지 않습니다.');
+                    }
+                } catch (error) {
+                    console.error('Gemini API 호출 실패:', error);
+                    
+                    // 폴백 응답
+                    return this.getFallbackResponse();
+                }
+            }
+
+            getFallbackResponse() {
+                const character = this.characters[this.currentCharacter];
+                const fallbackResponses = {
+                    cheerful: [
+                        '앗, 잠시 생각이 안 나네! 다른 얘기해볼까? 😅',
+                        '음.. 뭔가 말하고 싶은데 잠깐 멈춰있어! 다시 말해줄래? 💕',
+                        '어? 갑자기 머리가 하얘졌어! 다시 물어봐줘~ ✨'
+                    ],
+                    calm: [
+                        '잠시 생각을 정리하고 있어요. 조금 기다려주세요.',
+                        '마음이 복잡해서 말이 잘 나오지 않네요. 다시 시도해볼게요.',
+                        '지금은 적절한 답변을 찾기 어렵네요. 다른 방식으로 물어봐 주세요.'
+                    ],
+                    intelligent: [
+                        '현재 처리 중인 데이터에 문제가 있는 것 같습니다. 다시 시도해주세요.',
+                        '시스템에 일시적인 오류가 발생했습니다. 잠시 후 다시 말씀해주세요.',
+                        '정확한 답변을 위해 다시 한 번 질문해주시겠어요?'
+                    ]
+                };
+                
+                const responses = fallbackResponses[character.personality];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            showTypingIndicator() {
+                const character = this.characters[this.currentCharacter];
+                document.querySelector('#typing-indicator .message-avatar').textContent = character.emoji;
+                this.typingIndicator.style.display = 'flex';
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                this.typingIndicator.style.display = 'none';
+            }
+
+            saveChatHistory() {
+                const currentUser = localStorage.getItem('currentUser');
+                if (!currentUser) return;
+                
+                const chatHistory = Array.from(this.chatMessages.children)
+                    .filter(msg => !msg.classList.contains('welcome-message'))
+                    .map(msg => ({
+                        sender: msg.classList.contains('user') ? 'user' : 'ai',
+                        content: msg.querySelector('.message-content').textContent,
+                        timestamp: Date.now(),
+                        character: this.currentCharacter
+                    }));
+                
+                localStorage.setItem(`chatHistory_${currentUser}`, JSON.stringify(chatHistory));
+            }
+
+            loadChatHistory() {
+                const currentUser = localStorage.getItem('currentUser');
+                if (!currentUser) return;
+                
+                const chatHistory = JSON.parse(localStorage.getItem(`chatHistory_${currentUser}`) || '[]');
+                
+                // 환영 메시지 뒤에 기록 추가
+                chatHistory.forEach(msg => {
+                    // 캐릭터가 다르면 히스토리 표시 안함 (새로운 대화로 시작)
+                    if (msg.character === this.currentCharacter) {
+                        this.addMessage(msg.sender, msg.content);
+                        
+                        // 대화 히스토리에도 추가 (API 호출을 위한 컨텍스트)
+                        const role = msg.sender === 'user' ? 'user' : 'assistant';
+                        this.conversationHistory.push({ role: role, content: msg.content });
+                    }
+                });
+            }
+        }
+
+        // 앱 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            new AuthSystem();
+        });
