@@ -149,6 +149,59 @@
             text-decoration: underline;
         }
 
+        /* 설정 패널 */
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .api-input:focus {
+            border-color: #667eea;
+        }
+
+        .api-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .api-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .api-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .api-status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         /* 채팅 컨테이너 스타일 */
         .chat-container {
             width: 90%;
@@ -604,6 +657,15 @@
                 <p class="auth-subtitle">가상 친구와 함께하는 특별한 시간</p>
             </div>
 
+            <!-- 설정 패널 -->
+            <div class="settings-panel">
+                <h3 class="settings-title">Gemini API 설정</h3>
+                <input type="password" class="api-input" id="api-key-input" placeholder="Gemini API 키를 입력하세요">
+                <div class="api-status warning" id="api-status">
+                    API 키가 필요합니다. Google AI Studio에서 무료로 받을 수 있습니다.
+                </div>
+            </div>
+
             <!-- 로그인 폼 -->
             <form class="auth-form" id="login-form">
                 <div class="form-group">
@@ -660,7 +722,7 @@
                 </div>
                 <div class="character-details">
                     <h2 id="character-name">Ani</h2>
-                    <div class="character-status">온라인 • 친절한 AI 컴패니언</div>
+                    <div class="character-status">온라인 • AI 기반 컴패니언</div>
                 </div>
             </div>
             <div class="user-info">
@@ -686,6 +748,7 @@
             <div class="welcome-message">
                 <h3>🎉 환영합니다!</h3>
                 <p>AI 컴패니언과 함께하는 즐거운 대화를 시작해보세요!</p>
+                <small>Google Gemini AI가 실제 대화를 생성합니다.</small>
             </div>
         </div>
 
@@ -713,6 +776,7 @@
                 
                 this.initializeElements();
                 this.bindEvents();
+                this.loadAPIKey();
                 
                 // 자동 로그인 확인
                 if (this.currentUser && this.users[this.currentUser]) {
@@ -730,6 +794,8 @@
                 this.userName = document.getElementById('user-name');
                 this.userAvatar = document.getElementById('user-avatar');
                 this.logoutBtn = document.getElementById('logout-btn');
+                this.apiKeyInput = document.getElementById('api-key-input');
+                this.apiStatus = document.getElementById('api-status');
             }
 
             bindEvents() {
@@ -737,6 +803,39 @@
                 this.signupForm.addEventListener('submit', (e) => this.handleSignup(e));
                 this.authSwitchLink.addEventListener('click', (e) => this.toggleAuthMode(e));
                 this.logoutBtn.addEventListener('click', () => this.logout());
+                this.apiKeyInput.addEventListener('input', () => this.handleAPIKeyChange());
+                this.apiKeyInput.addEventListener('blur', () => this.saveAPIKey());
+            }
+
+            loadAPIKey() {
+                const savedKey = localStorage.getItem('gemini_api_key');
+                if (savedKey) {
+                    this.apiKeyInput.value = savedKey;
+                    this.updateAPIStatus('success', 'API 키가 설정되었습니다.');
+                }
+            }
+
+            handleAPIKeyChange() {
+                const apiKey = this.apiKeyInput.value.trim();
+                if (apiKey.length === 0) {
+                    this.updateAPIStatus('warning', 'API 키가 필요합니다.');
+                } else if (apiKey.length < 20) {
+                    this.updateAPIStatus('error', 'API 키가 너무 짧습니다.');
+                } else {
+                    this.updateAPIStatus('success', 'API 키가 설정되었습니다.');
+                }
+            }
+
+            saveAPIKey() {
+                const apiKey = this.apiKeyInput.value.trim();
+                if (apiKey.length > 20) {
+                    localStorage.setItem('gemini_api_key', apiKey);
+                }
+            }
+
+            updateAPIStatus(type, message) {
+                this.apiStatus.className = `api-status ${type}`;
+                this.apiStatus.textContent = message;
             }
 
             toggleAuthMode(e) {
@@ -798,376 +897,3 @@
                 }
                 
                 if (!password) {
-                    this.showError('login-password', '비밀번호를 입력해주세요.');
-                    isValid = false;
-                }
-                
-                if (!isValid) return;
-                
-                // 사용자 인증
-                if (!this.users[email]) {
-                    this.showError('login-email', '등록되지 않은 이메일입니다.');
-                    return;
-                }
-                
-                if (this.users[email].password !== password) {
-                    this.showError('login-password', '비밀번호가 올바르지 않습니다.');
-                    return;
-                }
-                
-                // 로그인 성공
-                this.currentUser = email;
-                localStorage.setItem('currentUser', email);
-                this.showChatInterface();
-            }
-
-            handleSignup(e) {
-                e.preventDefault();
-                this.clearErrors();
-                
-                const name = document.getElementById('signup-name').value;
-                const email = document.getElementById('signup-email').value;
-                const password = document.getElementById('signup-password').value;
-                const confirmPassword = document.getElementById('signup-confirm').value;
-                
-                let isValid = true;
-                
-                if (!name.trim()) {
-                    this.showError('signup-name', '이름을 입력해주세요.');
-                    isValid = false;
-                } else if (name.trim().length < 2) {
-                    this.showError('signup-name', '이름은 2글자 이상이어야 합니다.');
-                    isValid = false;
-                }
-                
-                if (!email) {
-                    this.showError('signup-email', '이메일을 입력해주세요.');
-                    isValid = false;
-                } else if (!this.validateEmail(email)) {
-                    this.showError('signup-email', '올바른 이메일 형식이 아닙니다.');
-                    isValid = false;
-                } else if (this.users[email]) {
-                    this.showError('signup-email', '이미 가입된 이메일입니다.');
-                    isValid = false;
-                }
-                
-                if (!password) {
-                    this.showError('signup-password', '비밀번호를 입력해주세요.');
-                    isValid = false;
-                } else if (password.length < 8) {
-                    this.showError('signup-password', '비밀번호는 8자 이상이어야 합니다.');
-                    isValid = false;
-                }
-                
-                if (!confirmPassword) {
-                    this.showError('signup-confirm', '비밀번호 확인을 입력해주세요.');
-                    isValid = false;
-                } else if (password !== confirmPassword) {
-                    this.showError('signup-confirm', '비밀번호가 일치하지 않습니다.');
-                    isValid = false;
-                }
-                
-                if (!isValid) return;
-                
-                // 회원가입 성공
-                this.users[email] = {
-                    name: name.trim(),
-                    email: email,
-                    password: password,
-                    joinDate: new Date().toISOString()
-                };
-                
-                localStorage.setItem('aiCompanionUsers', JSON.stringify(this.users));
-                this.currentUser = email;
-                localStorage.setItem('currentUser', email);
-                
-                this.showChatInterface();
-            }
-
-            showChatInterface() {
-                const user = this.users[this.currentUser];
-                this.userName.textContent = user.name;
-                this.userAvatar.textContent = user.name.charAt(0).toUpperCase();
-                
-                this.authModal.style.display = 'none';
-                this.chatContainer.style.display = 'flex';
-                
-                // AI 컴패니언 초기화
-                if (!window.aiCompanion) {
-                    window.aiCompanion = new AICompanion();
-                }
-                
-                // 개인화된 환영 메시지
-                const welcomeMsg = `${user.name}님, 다시 만나서 반가워요! 오늘도 즐거운 대화해봐요~ 💕`;
-                setTimeout(() => {
-                    window.aiCompanion.addMessage('ai', welcomeMsg);
-                }, 500);
-            }
-
-            logout() {
-                if (confirm('정말 로그아웃하시겠습니까?')) {
-                    localStorage.removeItem('currentUser');
-                    this.currentUser = null;
-                    
-                    this.authModal.style.display = 'flex';
-                    this.chatContainer.style.display = 'none';
-                    
-                    // 폼 초기화
-                    this.loginForm.reset();
-                    this.signupForm.reset();
-                    this.clearErrors();
-                    
-                    // 로그인 모드로 전환
-                    this.isLoginMode = true;
-                    this.loginForm.style.display = 'flex';
-                    this.signupForm.style.display = 'none';
-                    this.authSwitchText.textContent = '계정이 없으신가요?';
-                    this.authSwitchLink.textContent = '회원가입';
-                }
-            }
-        }
-
-        class AICompanion {
-            constructor() {
-                this.currentCharacter = 'ani';
-                this.characters = {
-                    ani: {
-                        name: 'Ani',
-                        emoji: '👧',
-                        personality: 'cheerful',
-                        greeting: '안녕하세요! 저는 Ani예요~ 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕'
-                    },
-                    yuki: {
-                        name: 'Yuki',
-                        emoji: '❄️',
-                        personality: 'calm',
-                        greeting: '안녕하세요. 저는 Yuki입니다. 조용한 대화를 나누면서 편안한 시간을 보내요.'
-                    },
-                    kai: {
-                        name: 'Kai',
-                        emoji: '🤖',
-                        personality: 'intelligent',
-                        greeting: '안녕하세요! Kai입니다. 궁금한 것이 있으시면 언제든 물어보세요!'
-                    }
-                };
-                
-                this.initializeElements();
-                this.bindEvents();
-                this.loadChatHistory();
-            }
-
-            initializeElements() {
-                this.chatMessages = document.getElementById('chat-messages');
-                this.messageInput = document.getElementById('message-input');
-                this.sendButton = document.getElementById('send-button');
-                this.typingIndicator = document.getElementById('typing-indicator');
-                this.characterName = document.getElementById('character-name');
-                this.characterEmoji = document.getElementById('character-emoji');
-            }
-
-            bindEvents() {
-                this.sendButton.addEventListener('click', () => this.sendMessage());
-                this.messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.sendMessage();
-                });
-
-                // 캐릭터 선택
-                document.querySelectorAll('.character-option').forEach(option => {
-                    option.addEventListener('click', (e) => {
-                        this.switchCharacter(e.target.dataset.character);
-                    });
-                });
-            }
-
-            switchCharacter(characterKey) {
-                // 활성 캐릭터 변경
-                document.querySelectorAll('.character-option').forEach(opt => 
-                    opt.classList.remove('active'));
-                document.querySelector(`[data-character="${characterKey}"]`).classList.add('active');
-
-                this.currentCharacter = characterKey;
-                const character = this.characters[characterKey];
-                
-                // UI 업데이트
-                this.characterName.textContent = character.name;
-                this.characterEmoji.textContent = character.emoji;
-                
-                // 새로운 인사말 추가
-                this.addMessage('ai', character.greeting);
-                this.saveChatHistory();
-            }
-
-            sendMessage() {
-                const message = this.messageInput.value.trim();
-                if (!message) return;
-
-                // 사용자 메시지 추가
-                this.addMessage('user', message);
-                this.messageInput.value = '';
-                
-                // AI 응답 시뮬레이션
-                this.simulateAIResponse(message);
-                this.saveChatHistory();
-            }
-
-            addMessage(sender, content) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}`;
-                
-                const character = this.characters[this.currentCharacter];
-                const emoji = sender === 'ai' ? character.emoji : '👤';
-                
-                messageDiv.innerHTML = `
-                    <div class="message-avatar">${emoji}</div>
-                    <div class="message-content">${content}</div>
-                `;
-                
-                this.chatMessages.appendChild(messageDiv);
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-            }
-
-            simulateAIResponse(userMessage) {
-                // 타이핑 인디케이터 표시
-                this.showTypingIndicator();
-                
-                setTimeout(() => {
-                    this.hideTypingIndicator();
-                    const response = this.generateResponse(userMessage);
-                    this.addMessage('ai', response);
-                    this.saveChatHistory();
-                }, 1000 + Math.random() * 2000);
-            }
-
-            generateResponse(userMessage) {
-                const character = this.characters[this.currentCharacter];
-                const responses = this.getCharacterResponses(character.personality, userMessage);
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-
-            getCharacterResponses(personality, userMessage) {
-                const lowerMessage = userMessage.toLowerCase();
-                const currentUser = localStorage.getItem('currentUser');
-                const users = JSON.parse(localStorage.getItem('aiCompanionUsers') || '{}');
-                const userName = users[currentUser]?.name || '사용자';
-                
-                // 개인화된 응답
-                if (lowerMessage.includes('안녕') || lowerMessage.includes('하이')) {
-                    return personality === 'cheerful' ? 
-                        [`${userName}님 안녕하세요! 반가워요~ 😊`, `하이하이 ${userName}님! 오늘도 좋은 하루에요! ✨`] :
-                        personality === 'calm' ? 
-                        [`안녕하세요 ${userName}님. 편안한 하루 되세요.`, `반갑습니다 ${userName}님. 좋은 시간 보내고 계신가요?`] :
-                        [`안녕하세요 ${userName}님! 무엇을 도와드릴까요?`, `반갑습니다 ${userName}님. 궁금한 것이 있으시면 말씀해 주세요.`];
-                }
-                
-                if (lowerMessage.includes('이름') || lowerMessage.includes('누구')) {
-                    return personality === 'cheerful' ? 
-                        [`저는 ${this.characters[this.currentCharacter].name}이에요! ${userName}님과 친구가 되고 싶어요~ 💕`] :
-                        personality === 'calm' ? 
-                        [`저는 ${this.characters[this.currentCharacter].name}입니다. ${userName}님과 조용한 대화를 나누고 싶어요.`] :
-                        [`저는 AI 어시스턴트 ${this.characters[this.currentCharacter].name}입니다. ${userName}님을 도와드릴게요!`];
-                }
-                
-                if (lowerMessage.includes('날씨')) {
-                    return personality === 'cheerful' ? 
-                        [`${userName}님, 오늘 날씨 정말 좋죠! 밖에 나가고 싶어져요~ ☀️`, '날씨에 따라 기분도 달라지는 것 같아요! 💕'] :
-                        personality === 'calm' ? 
-                        ['날씨가 마음에 영향을 주는 것 같아요.', '계절의 변화를 느끼며 살아가는 것도 좋은 것 같아요.'] :
-                        ['날씨 정보가 필요하시면 날씨 앱을 확인해보세요!', '기상청 데이터를 통해 정확한 정보를 얻으실 수 있어요.'];
-                }
-                
-                if (lowerMessage.includes('고마워') || lowerMessage.includes('감사')) {
-                    return personality === 'cheerful' ? 
-                        [`${userName}님과 대화할 수 있어서 저도 행복해요! 😊`, '에헤~ 별말씀을요! 언제든 말 걸어주세요! ✨'] :
-                        personality === 'calm' ? 
-                        [`${userName}님의 마음이 전해져서 저도 기뻐요.`, '함께 시간을 보낼 수 있어서 좋습니다.'] :
-                        [`${userName}님을 도울 수 있어서 기쁩니다!`, '더 필요한 것이 있으시면 언제든 말씀해 주세요.'];
-                }
-                
-                // 감정 관련 응답
-                if (lowerMessage.includes('슬퍼') || lowerMessage.includes('우울') || lowerMessage.includes('힘들')) {
-                    return personality === 'cheerful' ? 
-                        [`${userName}님, 힘내세요! 제가 곁에 있어요~ 💪`, '슬픈 일이 있으셨나요? 이야기해주시면 들어드릴게요! 💕'] :
-                        personality === 'calm' ? 
-                        [`${userName}님, 모든 감정은 자연스러운 것이에요. 천천히 회복하세요.`, '때로는 쉬어가는 것도 필요해요. 무리하지 마세요.'] :
-                        [`${userName}님, 어려운 시기를 겪고 계신 것 같네요. 도움이 될 방법을 찾아볼까요?`, '전문가의 도움이 필요하시면 상담센터를 이용하시는 것도 좋겠어요.'];
-                }
-                
-                if (lowerMessage.includes('기뻐') || lowerMessage.includes('행복') || lowerMessage.includes('좋아')) {
-                    return personality === 'cheerful' ? 
-                        [`와! ${userName}님이 행복하시니까 저도 너무 기뻐요! 🎉`, '좋은 일이 있으셨나봐요! 자세히 들려주세요~ ✨'] :
-                        personality === 'calm' ? 
-                        [`${userName}님의 기쁨이 저에게도 전해져요.`, '행복한 순간들이 오래오래 기억되길 바라요.'] :
-                        [`${userName}님의 긍정적인 에너지가 느껴져요!`, '좋은 일들이 계속 이어지길 바랍니다.'];
-                }
-                
-                // 기본 응답
-                const defaultResponses = {
-                    cheerful: [
-                        `와! ${userName}님 정말 재미있는 얘기네요! 더 들려주세요~ 😄`,
-                        `그런 일이 있었군요! 저도 비슷한 경험이... 아, 제가 AI라 그런 경험은 없겠네요 😅`,
-                        `${userName}님과 이야기하는 시간이 정말 즐거워요! 💕`,
-                        `우와~ 그거 정말 신기해요! 더 자세히 알려주세요! ✨`
-                    ],
-                    calm: [
-                        `${userName}님, 그렇군요. 차분히 생각해보시는 것이 좋겠어요.`,
-                        '때로는 조용한 시간이 필요할 때가 있어요.',
-                        `${userName}님의 마음이 편안해지는 시간을 가지시길 바라요.`,
-                        '깊이 생각해볼 만한 이야기네요.'
-                    ],
-                    intelligent: [
-                        `${userName}님, 흥미로운 관점이네요. 다른 각도에서 생각해보면 어떨까요?`,
-                        '그에 대해 더 자세한 정보가 필요하시면 도움을 드릴 수 있어요.',
-                        `${userName}님, 논리적으로 접근해보면 좋은 결과가 있을 것 같아요.`,
-                        '데이터나 근거가 있다면 더 정확한 답변을 드릴 수 있어요.'
-                    ]
-                };
-                
-                return defaultResponses[personality] || defaultResponses.cheerful;
-            }
-
-            showTypingIndicator() {
-                const character = this.characters[this.currentCharacter];
-                document.querySelector('#typing-indicator .message-avatar').textContent = character.emoji;
-                this.typingIndicator.style.display = 'flex';
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-            }
-
-            hideTypingIndicator() {
-                this.typingIndicator.style.display = 'none';
-            }
-
-            saveChatHistory() {
-                const currentUser = localStorage.getItem('currentUser');
-                if (!currentUser) return;
-                
-                const chatHistory = Array.from(this.chatMessages.children)
-                    .filter(msg => !msg.classList.contains('welcome-message'))
-                    .map(msg => ({
-                        sender: msg.classList.contains('user') ? 'user' : 'ai',
-                        content: msg.querySelector('.message-content').textContent,
-                        timestamp: Date.now()
-                    }));
-                
-                localStorage.setItem(`chatHistory_${currentUser}`, JSON.stringify(chatHistory));
-            }
-
-            loadChatHistory() {
-                const currentUser = localStorage.getItem('currentUser');
-                if (!currentUser) return;
-                
-                const chatHistory = JSON.parse(localStorage.getItem(`chatHistory_${currentUser}`) || '[]');
-                
-                // 환영 메시지 뒤에 기록 추가
-                chatHistory.forEach(msg => {
-                    this.addMessage(msg.sender, msg.content);
-                });
-            }
-        }
-
-        // 앱 초기화
-        document.addEventListener('DOMContentLoaded', () => {
-            new AuthSystem();
-        });
-    </script>
-</body>
-</html>
