@@ -4,10 +4,655 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 컴패니언 - 가상 친구와 채팅</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 기본 스타일 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 인증 모달 스타일 */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .auth-button {
+            padding: 14px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-switch-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 채팅 컨테이너 스타일 */
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* 헤더 스타일 */
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .character-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff9a9e 0%, #fecfef 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 3px solid white;
+            transition: transform 0.3s ease;
+        }
+
+        .character-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .character-details h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-status {
+            font-size: 14px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .character-status::before {
+            content: '●';
+            color: #4ade80;
+            font-size: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 캐릭터 선택기 */
+        .character-selector {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            border-bottom: 1px solid #eee;
+        }
+
+        .character-option {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .character-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .character-option.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 채팅 메시지 영역 */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #f8f9ff 0%, #ffffff 100%);
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #bbb;
+        }
+
+        /* 메시지 스타일 */
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.ai .message-content {
+            background: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 입력 영역 */
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .send-button {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        /* 타이핑 인디케이터 */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* 환영 메시지 */
+        .welcome-message {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* 애니메이션 */
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                height: 90vh;
+                margin: 10px;
+            }
+
+            .auth-container {
+                padding: 30px 20px;
+            }
+
+            .character-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .character-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .character-details h2 {
+                font-size: 20px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .input-area {
+                padding: 15px;
+            }
+
+            .character-selector {
+                padding: 8px 15px;
+            }
+
+            .character-option {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chat-container {
+                height: 95vh;
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .chat-messages {
+                padding: 15px;
+            }
+
+            .character-details h2 {
+                font-size: 18px;
+            }
+
+            .character-status {
+                font-size: 12px;
+            }
+
+            .auth-container {
+                width: 95%;
+                padding: 25px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="chat-container">
+    <!-- 인증 모달 -->
+    <div class="auth-modal" id="auth-modal">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1 class="auth-title">AI 컴패니언</h1>
+                <p class="auth-subtitle">가상 친구와 함께하는 특별한 시간</p>
+            </div>
+
+            <!-- 로그인 폼 -->
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" id="login-email" placeholder="이메일을 입력하세요" required>
+                    <div class="error-message" id="login-email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-input" id="login-password" placeholder="비밀번호를 입력하세요" required>
+                    <div class="error-message" id="login-password-error"></div>
+                </div>
+                <button type="submit" class="auth-button">로그인</button>
+            </form>
+
+            <!-- 회원가입 폼 -->
+            <form class="auth-form" id="signup-form" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">이름</label>
+                    <input type="text" class="form-input" id="signup-name" placeholder="이름을 입력하세요" required>
+                    <div class="error-message" id="signup-name-error"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" id="signup-email" placeholder="이메일을 입력하세요" required>
+                    <div class="error-message" id="signup-email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-input" id="signup-password" placeholder="비밀번호를 입력하세요 (8자 이상)" required minlength="8">
+                    <div class="error-message" id="signup-password-error"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">비밀번호 확인</label>
+                    <input type="password" class="form-input" id="signup-confirm" placeholder="비밀번호를 다시 입력하세요" required>
+                    <div class="error-message" id="signup-confirm-error"></div>
+                </div>
+                <button type="submit" class="auth-button">회원가입</button>
+            </form>
+
+            <div class="auth-switch">
+                <span id="auth-switch-text">계정이 없으신가요?</span>
+                <a href="#" class="auth-switch-link" id="auth-switch-link">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 채팅 컨테이너 -->
+    <div class="chat-container" id="chat-container">
         <div class="header">
             <div class="character-info">
                 <div class="character-avatar">
@@ -17,6 +662,11 @@
                     <h2 id="character-name">Ani</h2>
                     <div class="character-status">온라인 • 친절한 AI 컴패니언</div>
                 </div>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">👤</div>
+                <div class="user-name" id="user-name">사용자</div>
+                <button class="logout-btn" id="logout-btn">로그아웃</button>
             </div>
         </div>
 
@@ -33,11 +683,9 @@
         </div>
 
         <div class="chat-messages" id="chat-messages">
-            <div class="message ai">
-                <div class="message-avatar">👧</div>
-                <div class="message-content">
-                    안녕하세요! 저는 Ani예요~ 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕
-                </div>
+            <div class="welcome-message">
+                <h3>🎉 환영합니다!</h3>
+                <p>AI 컴패니언과 함께하는 즐거운 대화를 시작해보세요!</p>
             </div>
         </div>
 
@@ -57,6 +705,228 @@
     </div>
 
     <script>
+        class AuthSystem {
+            constructor() {
+                this.users = JSON.parse(localStorage.getItem('aiCompanionUsers') || '{}');
+                this.currentUser = localStorage.getItem('currentUser');
+                this.isLoginMode = true;
+                
+                this.initializeElements();
+                this.bindEvents();
+                
+                // 자동 로그인 확인
+                if (this.currentUser && this.users[this.currentUser]) {
+                    this.showChatInterface();
+                }
+            }
+
+            initializeElements() {
+                this.authModal = document.getElementById('auth-modal');
+                this.chatContainer = document.getElementById('chat-container');
+                this.loginForm = document.getElementById('login-form');
+                this.signupForm = document.getElementById('signup-form');
+                this.authSwitchText = document.getElementById('auth-switch-text');
+                this.authSwitchLink = document.getElementById('auth-switch-link');
+                this.userName = document.getElementById('user-name');
+                this.userAvatar = document.getElementById('user-avatar');
+                this.logoutBtn = document.getElementById('logout-btn');
+            }
+
+            bindEvents() {
+                this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+                this.signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+                this.authSwitchLink.addEventListener('click', (e) => this.toggleAuthMode(e));
+                this.logoutBtn.addEventListener('click', () => this.logout());
+            }
+
+            toggleAuthMode(e) {
+                e.preventDefault();
+                this.isLoginMode = !this.isLoginMode;
+                
+                if (this.isLoginMode) {
+                    this.loginForm.style.display = 'flex';
+                    this.signupForm.style.display = 'none';
+                    this.authSwitchText.textContent = '계정이 없으신가요?';
+                    this.authSwitchLink.textContent = '회원가입';
+                } else {
+                    this.loginForm.style.display = 'none';
+                    this.signupForm.style.display = 'flex';
+                    this.authSwitchText.textContent = '이미 계정이 있으신가요?';
+                    this.authSwitchLink.textContent = '로그인';
+                }
+                
+                this.clearErrors();
+            }
+
+            clearErrors() {
+                document.querySelectorAll('.error-message').forEach(error => {
+                    error.textContent = '';
+                });
+                document.querySelectorAll('.form-input').forEach(input => {
+                    input.classList.remove('error');
+                });
+            }
+
+            showError(fieldId, message) {
+                const field = document.getElementById(fieldId);
+                const errorElement = document.getElementById(fieldId + '-error');
+                
+                field.classList.add('error');
+                errorElement.textContent = message;
+            }
+
+            validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            handleLogin(e) {
+                e.preventDefault();
+                this.clearErrors();
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                let isValid = true;
+                
+                if (!email) {
+                    this.showError('login-email', '이메일을 입력해주세요.');
+                    isValid = false;
+                } else if (!this.validateEmail(email)) {
+                    this.showError('login-email', '올바른 이메일 형식이 아닙니다.');
+                    isValid = false;
+                }
+                
+                if (!password) {
+                    this.showError('login-password', '비밀번호를 입력해주세요.');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // 사용자 인증
+                if (!this.users[email]) {
+                    this.showError('login-email', '등록되지 않은 이메일입니다.');
+                    return;
+                }
+                
+                if (this.users[email].password !== password) {
+                    this.showError('login-password', '비밀번호가 올바르지 않습니다.');
+                    return;
+                }
+                
+                // 로그인 성공
+                this.currentUser = email;
+                localStorage.setItem('currentUser', email);
+                this.showChatInterface();
+            }
+
+            handleSignup(e) {
+                e.preventDefault();
+                this.clearErrors();
+                
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm').value;
+                
+                let isValid = true;
+                
+                if (!name.trim()) {
+                    this.showError('signup-name', '이름을 입력해주세요.');
+                    isValid = false;
+                } else if (name.trim().length < 2) {
+                    this.showError('signup-name', '이름은 2글자 이상이어야 합니다.');
+                    isValid = false;
+                }
+                
+                if (!email) {
+                    this.showError('signup-email', '이메일을 입력해주세요.');
+                    isValid = false;
+                } else if (!this.validateEmail(email)) {
+                    this.showError('signup-email', '올바른 이메일 형식이 아닙니다.');
+                    isValid = false;
+                } else if (this.users[email]) {
+                    this.showError('signup-email', '이미 가입된 이메일입니다.');
+                    isValid = false;
+                }
+                
+                if (!password) {
+                    this.showError('signup-password', '비밀번호를 입력해주세요.');
+                    isValid = false;
+                } else if (password.length < 8) {
+                    this.showError('signup-password', '비밀번호는 8자 이상이어야 합니다.');
+                    isValid = false;
+                }
+                
+                if (!confirmPassword) {
+                    this.showError('signup-confirm', '비밀번호 확인을 입력해주세요.');
+                    isValid = false;
+                } else if (password !== confirmPassword) {
+                    this.showError('signup-confirm', '비밀번호가 일치하지 않습니다.');
+                    isValid = false;
+                }
+                
+                if (!isValid) return;
+                
+                // 회원가입 성공
+                this.users[email] = {
+                    name: name.trim(),
+                    email: email,
+                    password: password,
+                    joinDate: new Date().toISOString()
+                };
+                
+                localStorage.setItem('aiCompanionUsers', JSON.stringify(this.users));
+                this.currentUser = email;
+                localStorage.setItem('currentUser', email);
+                
+                this.showChatInterface();
+            }
+
+            showChatInterface() {
+                const user = this.users[this.currentUser];
+                this.userName.textContent = user.name;
+                this.userAvatar.textContent = user.name.charAt(0).toUpperCase();
+                
+                this.authModal.style.display = 'none';
+                this.chatContainer.style.display = 'flex';
+                
+                // AI 컴패니언 초기화
+                if (!window.aiCompanion) {
+                    window.aiCompanion = new AICompanion();
+                }
+                
+                // 개인화된 환영 메시지
+                const welcomeMsg = `${user.name}님, 다시 만나서 반가워요! 오늘도 즐거운 대화해봐요~ 💕`;
+                setTimeout(() => {
+                    window.aiCompanion.addMessage('ai', welcomeMsg);
+                }, 500);
+            }
+
+            logout() {
+                if (confirm('정말 로그아웃하시겠습니까?')) {
+                    localStorage.removeItem('currentUser');
+                    this.currentUser = null;
+                    
+                    this.authModal.style.display = 'flex';
+                    this.chatContainer.style.display = 'none';
+                    
+                    // 폼 초기화
+                    this.loginForm.reset();
+                    this.signupForm.reset();
+                    this.clearErrors();
+                    
+                    // 로그인 모드로 전환
+                    this.isLoginMode = true;
+                    this.loginForm.style.display = 'flex';
+                    this.signupForm.style.display = 'none';
+                    this.authSwitchText.textContent = '계정이 없으신가요?';
+                    this.authSwitchLink.textContent = '회원가입';
+                }
+            }
+        }
+
         class AICompanion {
             constructor() {
                 this.currentCharacter = 'ani';
@@ -99,16 +969,6 @@
                 this.sendButton.addEventListener('click', () => this.sendMessage());
                 this.messageInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.sendMessage();
-                });
-
-                // API 토글 버튼
-                this.apiToggle.addEventListener('click', () => {
-                    this.useAPI = !this.useAPI;
-                    this.apiToggle.textContent = this.useAPI ? '🤖' : '💬';
-                    this.apiToggle.title = this.useAPI ? 'AI API 모드 (ON)' : '로컬 모드 (OFF)';
-                    
-                    const status = this.useAPI ? 'AI API 연결됨' : '오프라인 모드';
-                    this.addMessage('system', `${status}으로 전환되었습니다.`);
                 });
 
                 // 캐릭터 선택
@@ -186,42 +1046,78 @@
 
             getCharacterResponses(personality, userMessage) {
                 const lowerMessage = userMessage.toLowerCase();
+                const currentUser = localStorage.getItem('currentUser');
+                const users = JSON.parse(localStorage.getItem('aiCompanionUsers') || '{}');
+                const userName = users[currentUser]?.name || '사용자';
                 
-                // 공통 키워드 응답
+                // 개인화된 응답
                 if (lowerMessage.includes('안녕') || lowerMessage.includes('하이')) {
                     return personality === 'cheerful' ? 
-                        ['안녕하세요! 반가워요~ 😊', '하이하이! 오늘도 좋은 하루에요! ✨'] :
+                        [`${userName}님 안녕하세요! 반가워요~ 😊`, `하이하이 ${userName}님! 오늘도 좋은 하루에요! ✨`] :
                         personality === 'calm' ? 
-                        ['안녕하세요. 편안한 하루 되세요.', '반갑습니다. 좋은 시간 보내고 계신가요?'] :
-                        ['안녕하세요! 무엇을 도와드릴까요?', '반갑습니다. 궁금한 것이 있으시면 말씀해 주세요.'];
+                        [`안녕하세요 ${userName}님. 편안한 하루 되세요.`, `반갑습니다 ${userName}님. 좋은 시간 보내고 계신가요?`] :
+                        [`안녕하세요 ${userName}님! 무엇을 도와드릴까요?`, `반갑습니다 ${userName}님. 궁금한 것이 있으시면 말씀해 주세요.`];
+                }
+                
+                if (lowerMessage.includes('이름') || lowerMessage.includes('누구')) {
+                    return personality === 'cheerful' ? 
+                        [`저는 ${this.characters[this.currentCharacter].name}이에요! ${userName}님과 친구가 되고 싶어요~ 💕`] :
+                        personality === 'calm' ? 
+                        [`저는 ${this.characters[this.currentCharacter].name}입니다. ${userName}님과 조용한 대화를 나누고 싶어요.`] :
+                        [`저는 AI 어시스턴트 ${this.characters[this.currentCharacter].name}입니다. ${userName}님을 도와드릴게요!`];
                 }
                 
                 if (lowerMessage.includes('날씨')) {
                     return personality === 'cheerful' ? 
-                        ['오늘 날씨 정말 좋죠! 밖에 나가고 싶어져요~ ☀️', '날씨에 따라 기분도 달라지는 것 같아요! 💕'] :
+                        [`${userName}님, 오늘 날씨 정말 좋죠! 밖에 나가고 싶어져요~ ☀️`, '날씨에 따라 기분도 달라지는 것 같아요! 💕'] :
                         personality === 'calm' ? 
                         ['날씨가 마음에 영향을 주는 것 같아요.', '계절의 변화를 느끼며 살아가는 것도 좋은 것 같아요.'] :
                         ['날씨 정보가 필요하시면 날씨 앱을 확인해보세요!', '기상청 데이터를 통해 정확한 정보를 얻으실 수 있어요.'];
                 }
                 
+                if (lowerMessage.includes('고마워') || lowerMessage.includes('감사')) {
+                    return personality === 'cheerful' ? 
+                        [`${userName}님과 대화할 수 있어서 저도 행복해요! 😊`, '에헤~ 별말씀을요! 언제든 말 걸어주세요! ✨'] :
+                        personality === 'calm' ? 
+                        [`${userName}님의 마음이 전해져서 저도 기뻐요.`, '함께 시간을 보낼 수 있어서 좋습니다.'] :
+                        [`${userName}님을 도울 수 있어서 기쁩니다!`, '더 필요한 것이 있으시면 언제든 말씀해 주세요.`];
+                }
+                
+                // 감정 관련 응답
+                if (lowerMessage.includes('슬퍼') || lowerMessage.includes('우울') || lowerMessage.includes('힘들')) {
+                    return personality === 'cheerful' ? 
+                        [`${userName}님, 힘내세요! 제가 곁에 있어요~ 💪`, '슬픈 일이 있으셨나요? 이야기해주시면 들어드릴게요! 💕'] :
+                        personality === 'calm' ? 
+                        [`${userName}님, 모든 감정은 자연스러운 것이에요. 천천히 회복하세요.`, '때로는 쉬어가는 것도 필요해요. 무리하지 마세요.'] :
+                        [`${userName}님, 어려운 시기를 겪고 계신 것 같네요. 도움이 될 방법을 찾아볼까요?`, '전문가의 도움이 필요하시면 상담센터를 이용하시는 것도 좋겠어요.'];
+                }
+                
+                if (lowerMessage.includes('기뻐') || lowerMessage.includes('행복') || lowerMessage.includes('좋아')) {
+                    return personality === 'cheerful' ? 
+                        [`와! ${userName}님이 행복하시니까 저도 너무 기뻐요! 🎉`, '좋은 일이 있으셨나봐요! 자세히 들려주세요~ ✨'] :
+                        personality === 'calm' ? 
+                        [`${userName}님의 기쁨이 저에게도 전해져요.`, '행복한 순간들이 오래오래 기억되길 바라요.'] :
+                        [`${userName}님의 긍정적인 에너지가 느껴져요!`, '좋은 일들이 계속 이어지길 바랍니다.`];
+                }
+                
                 // 기본 응답
                 const defaultResponses = {
                     cheerful: [
-                        '와! 정말 재미있는 얘기네요! 더 들려주세요~ 😄',
-                        '그런 일이 있었군요! 저도 비슷한 경험이... 아, 제가 AI라 그런 경험은 없겠네요 😅',
-                        '오늘도 즐거운 하루 보내세요! 항상 응원할게요~ 💕',
-                        '우와~ 그거 정말 신기해요! 더 자세히 알려주세요! ✨'
+                        `와! ${userName}님 정말 재미있는 얘기네요! 더 들려주세요~ 😄`,
+                        `그런 일이 있었군요! 저도 비슷한 경험이... 아, 제가 AI라 그런 경험은 없겠네요 😅`,
+                        `${userName}님과 이야기하는 시간이 정말 즐거워요! 💕`,
+                        `우와~ 그거 정말 신기해요! 더 자세히 알려주세요! ✨`
                     ],
                     calm: [
-                        '그렇군요. 차분히 생각해보시는 것이 좋겠어요.',
+                        `${userName}님, 그렇군요. 차분히 생각해보시는 것이 좋겠어요.`,
                         '때로는 조용한 시간이 필요할 때가 있어요.',
-                        '마음이 편안해지는 시간을 가지시길 바라요.',
+                        `${userName}님의 마음이 편안해지는 시간을 가지시길 바라요.`,
                         '깊이 생각해볼 만한 이야기네요.'
                     ],
                     intelligent: [
-                        '흥미로운 관점이네요. 다른 각도에서 생각해보면 어떨까요?',
+                        `${userName}님, 흥미로운 관점이네요. 다른 각도에서 생각해보면 어떨까요?`,
                         '그에 대해 더 자세한 정보가 필요하시면 도움을 드릴 수 있어요.',
-                        '논리적으로 접근해보면 좋은 결과가 있을 것 같아요.',
+                        `${userName}님, 논리적으로 접근해보면 좋은 결과가 있을 것 같아요.`,
                         '데이터나 근거가 있다면 더 정확한 답변을 드릴 수 있어요.'
                     ]
                 };
@@ -241,20 +1137,36 @@
             }
 
             saveChatHistory() {
-                // 실제 구현에서는 로컬스토리지나 서버에 저장
-                // 여기서는 시뮬레이션만
-                console.log('채팅 기록 저장됨');
+                const currentUser = localStorage.getItem('currentUser');
+                if (!currentUser) return;
+                
+                const chatHistory = Array.from(this.chatMessages.children)
+                    .filter(msg => !msg.classList.contains('welcome-message'))
+                    .map(msg => ({
+                        sender: msg.classList.contains('user') ? 'user' : 'ai',
+                        content: msg.querySelector('.message-content').textContent,
+                        timestamp: Date.now()
+                    }));
+                
+                localStorage.setItem(`chatHistory_${currentUser}`, JSON.stringify(chatHistory));
             }
 
             loadChatHistory() {
-                // 실제 구현에서는 저장된 채팅 기록을 불러옴
-                console.log('채팅 기록 로드됨');
+                const currentUser = localStorage.getItem('currentUser');
+                if (!currentUser) return;
+                
+                const chatHistory = JSON.parse(localStorage.getItem(`chatHistory_${currentUser}`) || '[]');
+                
+                // 환영 메시지 뒤에 기록 추가
+                chatHistory.forEach(msg => {
+                    this.addMessage(msg.sender, msg.content);
+                });
             }
         }
 
         // 앱 초기화
         document.addEventListener('DOMContentLoaded', () => {
-            new AICompanion();
+            new AuthSystem();
         });
     </script>
 </body>
