@@ -399,6 +399,10 @@
         function initializeChat() {
             // 환영 메시지 표시
             addWelcomeMessage();
+            // Google AI 연결 테스트
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
         }
 
         function addWelcomeMessage() {
@@ -552,14 +556,60 @@
 
         function toggleAPI() {
             useAPI = !useAPI;
-            const apiStatus = elements.apiToggle.querySelector('.api-status');
+            updateAPIToggle();
             
+            const statusMessage = useAPI ? 
+                '🤖 OpenAI API 모드가 활성화되었습니다.' : 
+                '💬 로컬 모드로 전환되었습니다.';
+            
+            addMessage('system', statusMessage);
+            
+            // API 연결 테스트
             if (useAPI) {
-                apiStatus.textContent = '🤖';
-                elements.apiStatusText.textContent = 'OpenAI API 연결됨';
-                elements.apiToggle.style.background = 'linear-gradient(45deg, #4ade80, #22c55e)';
-            } else {
-                apiStatus.textContent = '💬';
+                testAPIConnection();
+            }
+        }
+
+        async function testAPIConnection() {
+            try {
+                console.log('Testing API connection...');
+                addMessage('system', '🔄 API 연결 테스트 중...');
+                
+                const testResponse = await fetch(OPENAI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{ role: 'user', content: 'Hi' }],
+                        max_tokens: 10
+                    })
+                });
+                
+                if (testResponse.ok) {
+                    addMessage('system', '✅ API 연결이 성공적으로 확인되었습니다!');
+                    console.log('API connection test successful');
+                } else {
+                    const errorText = await testResponse.text();
+                    console.error('API connection test failed:', testResponse.status, errorText);
+                    addMessage('system', `❌ API 연결 실패: ${testResponse.status} - ${errorText}`);
+                    
+                    // API 키 문제인지 확인
+                    if (testResponse.status === 401) {
+                        addMessage('system', '🔑 API 키가 유효하지 않습니다. 로컬 모드로 전환됩니다.');
+                        useAPI = false;
+                        updateAPIToggle();
+                    }
+                }
+            } catch (error) {
+                console.error('API connection test error:', error);
+                addMessage('system', `❌ API 연결 테스트 오류: ${error.message}`);
+                useAPI = false;
+                updateAPIToggle();
+            }
+        }textContent = '💬';
                 elements.apiStatusText.textContent = '로컬 모드';
                 elements.apiToggle.style.background = 'linear-gradient(45deg, #fbbf24, #f59e0b)';
             }
