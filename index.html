@@ -255,15 +255,31 @@
         }
 
         function showRegisterForm() {
+            console.log('Showing register form');
             elements.loginForm.classList.add('hidden');
             elements.registerForm.classList.remove('hidden');
             clearErrors();
+            
+            // 포커스 설정
+            setTimeout(() => {
+                if (elements.registerNickname) {
+                    elements.registerNickname.focus();
+                }
+            }, 100);
         }
 
         function showLoginForm() {
+            console.log('Showing login form');
             elements.registerForm.classList.add('hidden');
             elements.loginForm.classList.remove('hidden');
             clearErrors();
+            
+            // 포커스 설정
+            setTimeout(() => {
+                if (elements.loginEmail) {
+                    elements.loginEmail.focus();
+                }
+            }, 100);
         }
 
         function clearErrors() {
