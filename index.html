@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- 로그인/회원가입 모달 -->
-    <div class="auth-overlay" id="auth-overlay">
+    <!-- 로그인/회원가입 모달 - 기본적으로 표시 -->
+    <div class="auth-overlay" id="auth-overlay" style="display: flex;">
         <div class="auth-modal">
-            <!-- 로그인 폼 -->
-            <div class="auth-form" id="login-form">
+            <!-- 로그인 폼 - 기본 표시 -->
+            <div class="auth-form" id="login-form" style="display: block;">
                 <h2>🤖 AI 컴패니언 로그인</h2>
                 <div class="form-container">
                     <input type="email" id="login-email" placeholder="📧 이메일" required>
@@ -20,10 +20,13 @@
                     <div class="error-message" id="login-error"></div>
                 </div>
                 <p>계정이 없으신가요? <a href="#" id="show-register">회원가입</a></p>
+                <div class="demo-account">
+                    <p><small>📌 데모 계정: test@test.com / 1234</small></p>
+                </div>
             </div>
 
-            <!-- 회원가입 폼 -->
-            <div class="auth-form hidden" id="register-form">
+            <!-- 회원가입 폼 - 기본 숨김 -->
+            <div class="auth-form" id="register-form" style="display: none;">
                 <h2>🌟 AI 컴패니언 회원가입</h2>
                 <div class="form-container">
                     <input type="text" id="register-nickname" placeholder="👤 닉네임" required maxlength="10">
@@ -38,8 +41,8 @@
         </div>
     </div>
 
-    <!-- 메인 채팅 화면 -->
-    <div class="main-container hidden" id="main-container">
+    <!-- 메인 채팅 화면 - 기본 숨김 -->
+    <div class="main-container" id="main-container" style="display: none;">
         <div class="chat-container">
             <div class="header">
                 <div class="character-info">
@@ -80,7 +83,7 @@
                 </div>
             </div>
 
-            <div class="typing-indicator hidden" id="typing-indicator">
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
                 <div class="message-avatar">👧</div>
                 <div class="typing-dots">
                     <div class="typing-dot"></div>
@@ -92,7 +95,7 @@
 
             <div class="input-area">
                 <div class="input-controls">
-                    <button class="api-toggle" id="api-toggle" title="OpenAI API 모드">
+                    <button class="api-toggle" id="api-toggle" title="Google AI 모드">
                         <span class="api-status">🤖</span>
                     </button>
                     <input type="text" class="message-input" id="message-input" placeholder="메시지를 입력하세요..." maxlength="500">
@@ -100,7 +103,7 @@
                         <span>전송</span>
                     </button>
                 </div>
-                <div class="api-status-text" id="api-status-text">OpenAI API 연결됨</div>
+                <div class="api-status-text" id="api-status-text">Google AI 연결됨</div>
             </div>
         </div>
     </div>
