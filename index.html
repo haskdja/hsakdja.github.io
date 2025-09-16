@@ -4,24 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 컴패니언 - 가상 친구와 채팅</title>
+    <!-- Favicon 추가 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
-    <style>
-        /* 기본 스타일 (style.css 파일이 없어도 동작하도록 간단한 스타일 추가) */
-        body { font-family: sans-serif; margin: 0; background-color: #f0f2f5; }
-        .auth-overlay { display: flex; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .auth-modal { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
-        .auth-form h2 { text-align: center; }
-        .form-container { display: flex; flex-direction: column; gap: 1rem; }
-        .form-container input { padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px; }
-        .form-container button { padding: 0.8rem; border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer; }
-        .error-message { color: red; text-align: center; margin-top: 0.5rem; min-height: 1.2em; }
-        .main-container { display: none; /* 기본 숨김 */ }
-        /* 여기에 더 많은 CSS가 필요하지만, 기능 테스트를 위한 최소 스타일입니다. */
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 로그인/회원가입 모달 - 기본적으로 표시 -->
     <div class="auth-overlay" id="auth-overlay" style="display: flex;">
         <div class="auth-modal">
+            <!-- 로그인 폼 - 기본 표시 -->
             <div class="auth-form" id="login-form" style="display: block;">
                 <h2>🤖 AI 컴패니언 로그인</h2>
                 <div class="form-container">
@@ -36,6 +27,7 @@
                 </div>
             </div>
 
+            <!-- 회원가입 폼 - 기본 숨김 -->
             <div class="auth-form" id="register-form" style="display: none;">
                 <h2>🌟 AI 컴패니언 회원가입</h2>
                 <div class="form-container">
@@ -51,23 +43,71 @@
         </div>
     </div>
 
+    <!-- 메인 채팅 화면 - 기본 숨김 -->
     <div class="main-container" id="main-container" style="display: none;">
-        <div id="user-nickname"></div>
-        <button id="logout-btn">로그아웃</button>
-        <div id="character-name"></div>
-        <div id="character-emoji"></div>
-        <div id="character-status"></div>
-        <div id="chat-messages"></div>
-        <div id="typing-indicator" style="display: none;">
-             <div class="message-avatar"></div>
+        <div class="chat-container">
+            <div class="header">
+                <div class="character-info">
+                    <div class="character-main">
+                        <div class="character-avatar">
+                            <span id="character-emoji">👧</span>
+                        </div>
+                        <div class="character-details">
+                            <h2 id="character-name">Ani</h2>
+                            <div class="character-status" id="character-status">온라인 • 친절한 AI 컴패니언</div>
+                        </div>
+                    </div>
+                    <div class="user-info">
+                        <span id="user-nickname">사용자</span>
+                        <button class="logout-btn" id="logout-btn">로그아웃</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="character-selector">
+                <div class="character-option active" data-character="ani">
+                    👧 Ani (활발한 소녀)
+                </div>
+                <div class="character-option" data-character="yuki">
+                    ❄️ Yuki (차분한 친구)
+                </div>
+                <div class="character-option" data-character="kai">
+                    🤖 Kai (똑똑한 조수)
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <div class="welcome-content">
+                        <h3>🎉 AI 컴패니언에 오신 것을 환영합니다!</h3>
+                        <p>원하는 캐릭터를 선택하고 대화를 시작해보세요!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                <div class="message-avatar">👧</div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span class="typing-text">응답 중...</span>
+            </div>
+
+            <div class="input-area">
+                <div class="input-controls">
+                    <button class="api-toggle" id="api-toggle" title="Google AI 모드">
+                        <span class="api-status">🤖</span>
+                    </button>
+                    <input type="text" class="message-input" id="message-input" placeholder="메시지를 입력하세요..." maxlength="500">
+                    <button class="send-button" id="send-button">
+                        <span>전송</span>
+                    </button>
+                </div>
+                <div class="api-status-text" id="api-status-text">Google AI 연결됨</div>
+            </div>
         </div>
-        <input type="text" id="message-input">
-        <button id="send-button">전송</button>
-        <button id="api-toggle"><span class="api-status"></span></button>
-        <div id="api-status-text"></div>
-        <div class="character-option" data-character="ani"></div>
-        <div class="character-option" data-character="yuki"></div>
-        <div class="character-option" data-character="kai"></div>
     </div>
 
     <script>
@@ -85,9 +125,27 @@
 
         // 캐릭터 설정
         const characters = {
-            ani: { name: 'Ani', emoji: '👧', greeting: '안녕하세요! 저는 Ani예요~ 🌸', systemPrompt: '너는 Ani야...', status: '온라인 • 활발한 소녀' },
-            yuki: { name: 'Yuki', emoji: '❄️', greeting: '안녕하세요. 저는 Yuki입니다 ❄️', systemPrompt: '너는 Yuki야...', status: '온라인 • 차분한 친구' },
-            kai: { name: 'Kai', emoji: '🤖', greeting: '안녕하세요! Kai입니다 🤖', systemPrompt: '너는 Kai야...', status: '온라인 • 똑똑한 조수' }
+            ani: {
+                name: 'Ani',
+                emoji: '👧',
+                greeting: '안녕하세요! 저는 Ani예요~ 🌸 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕',
+                systemPrompt: '너는 활발하고 귀여운 일본 애니메이션 소녀 캐릭터 "Ani"야. 항상 밝고 긍정적이며, 이모지를 자주 사용해. 한국어로 대화하고, 친근하고 장난기 있는 말투를 써. 사용자를 친구처럼 대해. 대답은 2-3문장으로 간결하게.',
+                status: '온라인 • 활발한 소녀'
+            },
+            yuki: {
+                name: 'Yuki',
+                emoji: '❄️',
+                greeting: '안녕하세요. 저는 Yuki입니다 ❄️ 조용한 대화를 나누면서 편안한 시간을 보내요.',
+                systemPrompt: '너는 차분하고 지적인 캐릭터 "Yuki"야. 조용하고 사려깊은 성격이며, 깊이 있는 대화를 좋아해. 한국어로 정중하고 부드러운 말투로 대화해. 철학적이고 감성적인 면이 있어. 대답은 차분하고 생각깊게.',
+                status: '온라인 • 차분한 친구'
+            },
+            kai: {
+                name: 'Kai',
+                emoji: '🤖',
+                greeting: '안녕하세요! Kai입니다 🤖 궁금한 것이 있으시면 언제든 물어보세요!',
+                systemPrompt: '너는 똑똑하고 도움이 되는 AI 어시스턴트 "Kai"야. 정확한 정보를 제공하고, 논리적으로 생각하며, 사용자의 질문에 친절하게 답변해. 한국어로 정중하되 친근한 말투를 써. 전문적이지만 따뜻해.',
+                status: '온라인 • 똑똑한 조수'
+            }
         };
 
         // DOM 로드 후 초기화
@@ -103,6 +161,7 @@
         });
 
         function initializeApp() {
+            // 저장된 사용자 확인
             const savedUser = localStorage.getItem('ai_companion_user');
             if (savedUser) {
                 try {
@@ -121,98 +180,230 @@
 
         function bindEvents() {
             console.log('Binding events...');
-            document.getElementById('show-register').addEventListener('click', (e) => { e.preventDefault(); showRegisterForm(); });
-            document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
-            document.getElementById('login-btn').addEventListener('click', handleLogin);
-            document.getElementById('register-btn').addEventListener('click', handleRegister);
-            document.getElementById('login-password').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
-            document.getElementById('register-confirm').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleRegister(); });
             
-            // 아래 요소들은 메인 화면에 실제로 존재해야 합니다.
+            // 폼 전환 이벤트
+            const showRegisterLink = document.getElementById('show-register');
+            const showLoginLink = document.getElementById('show-login');
+            
+            if (showRegisterLink) {
+                showRegisterLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Show register clicked');
+                    showRegisterForm();
+                });
+            }
+            
+            if (showLoginLink) {
+                showLoginLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Show login clicked');
+                    showLoginForm();
+                });
+            }
+            
+            // 로그인/회원가입 버튼
+            const loginBtn = document.getElementById('login-btn');
+            const registerBtn = document.getElementById('register-btn');
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Login button clicked');
+                    handleLogin();
+                });
+            }
+            
+            if (registerBtn) {
+                registerBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Register button clicked');
+                    handleRegister();
+                });
+            }
+            
+            // Enter 키 이벤트
+            const loginPassword = document.getElementById('login-password');
+            const registerConfirm = document.getElementById('register-confirm');
+            
+            if (loginPassword) {
+                loginPassword.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleLogin();
+                    }
+                });
+            }
+            
+            if (registerConfirm) {
+                registerConfirm.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleRegister();
+                    }
+                });
+            }
+            
+            // 로그아웃 버튼
             const logoutBtn = document.getElementById('logout-btn');
-            if(logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Logout clicked');
+                    handleLogout();
+                });
+            }
+            
+            // 채팅 관련
             const sendButton = document.getElementById('send-button');
-            if(sendButton) sendButton.addEventListener('click', sendMessage);
-
             const messageInput = document.getElementById('message-input');
-            if(messageInput) messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-
+            
+            if (sendButton) {
+                sendButton.addEventListener('click', sendMessage);
+            }
+            
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+            
+            // API 토글
             const apiToggle = document.getElementById('api-toggle');
-            if(apiToggle) apiToggle.addEventListener('click', toggleAPI);
-
-            document.querySelectorAll('.character-option').forEach(option => {
-                option.addEventListener('click', (e) => {
+            if (apiToggle) {
+                apiToggle.addEventListener('click', toggleAPI);
+            }
+            
+            // 캐릭터 선택
+            const characterOptions = document.querySelectorAll('.character-option');
+            characterOptions.forEach(function(option) {
+                option.addEventListener('click', function(e) {
                     const character = e.target.getAttribute('data-character');
-                    if (character) switchCharacter(character);
+                    if (character) {
+                        console.log('Character selected:', character);
+                        switchCharacter(character);
+                    }
                 });
             });
+            
             console.log('All events bound successfully');
         }
 
+        // 인증 시스템
         function showAuthModal() {
-            document.getElementById('auth-overlay').style.display = 'flex';
-            document.getElementById('main-container').style.display = 'none';
+            console.log('Showing auth modal');
+            const authOverlay = document.getElementById('auth-overlay');
+            const mainContainer = document.getElementById('main-container');
+            
+            if (authOverlay) authOverlay.style.display = 'flex';
+            if (mainContainer) mainContainer.style.display = 'none';
         }
 
         function showMainApp() {
-            document.getElementById('auth-overlay').style.display = 'none';
-            document.getElementById('main-container').style.display = 'flex';
+            console.log('Showing main app');
+            const authOverlay = document.getElementById('auth-overlay');
+            const mainContainer = document.getElementById('main-container');
+            
+            if (authOverlay) authOverlay.style.display = 'none';
+            if (mainContainer) mainContainer.style.display = 'flex';
+            
             if (currentUser) {
-                const userNicknameEl = document.getElementById('user-nickname');
-                if(userNicknameEl) userNicknameEl.textContent = currentUser.nickname;
+                const userNickname = document.getElementById('user-nickname');
+                if (userNickname) {
+                    userNickname.textContent = currentUser.nickname;
+                }
             }
-            // initializeChat(); // 채팅 관련 UI가 완전할 때 주석 해제
+            initializeChat();
         }
 
         function showRegisterForm() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'block';
+            console.log('Showing register form');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (loginForm) loginForm.style.display = 'none';
+            if (registerForm) registerForm.style.display = 'block';
             clearErrors();
-            document.getElementById('register-nickname').focus();
+            
+            setTimeout(function() {
+                const nicknameInput = document.getElementById('register-nickname');
+                if (nicknameInput) nicknameInput.focus();
+            }, 100);
         }
 
         function showLoginForm() {
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
+            console.log('Showing login form');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (registerForm) registerForm.style.display = 'none';
+            if (loginForm) loginForm.style.display = 'block';
             clearErrors();
-            document.getElementById('login-email').focus();
+            
+            setTimeout(function() {
+                const emailInput = document.getElementById('login-email');
+                if (emailInput) emailInput.focus();
+            }, 100);
         }
-        
+
         function clearErrors() {
-            document.getElementById('login-error').textContent = '';
-            document.getElementById('register-error').textContent = '';
+            const loginError = document.getElementById('login-error');
+            const registerError = document.getElementById('register-error');
+            
+            if (loginError) loginError.textContent = '';
+            if (registerError) registerError.textContent = '';
         }
 
         function handleRegister() {
-            const nickname = document.getElementById('register-nickname').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm').value;
-
+            console.log('HandleRegister function called');
+            
+            const nicknameInput = document.getElementById('register-nickname');
+            const emailInput = document.getElementById('register-email');
+            const passwordInput = document.getElementById('register-password');
+            const confirmInput = document.getElementById('register-confirm');
+            
+            if (!nicknameInput || !emailInput || !passwordInput || !confirmInput) {
+                showError('register', '필수 입력 필드를 찾을 수 없습니다.');
+                return;
+            }
+            
+            const nickname = nicknameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmInput.value;
+            
+            console.log('Register data:', { nickname: nickname, email: email });
+            
             if (!nickname || !email || !password || !confirmPassword) {
                 showError('register', '모든 필드를 입력해주세요.');
                 return;
             }
+            
             if (password !== confirmPassword) {
                 showError('register', '비밀번호가 일치하지 않습니다.');
                 return;
             }
+            
             if (password.length < 4) {
                 showError('register', '비밀번호는 4자 이상이어야 합니다.');
                 return;
             }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            
+            if (!isValidEmail(email)) {
                 showError('register', '올바른 이메일 형식이 아닙니다.');
                 return;
             }
-
+            
+            // 중복 사용자 확인
             const existingUsers = JSON.parse(localStorage.getItem('ai_companion_users') || '[]');
-            if (existingUsers.some(user => user.email === email)) {
+            if (existingUsers.some(function(user) { return user.email === email; })) {
                 showError('register', '이미 가입된 이메일입니다.');
                 return;
             }
-
+            
+            // 새 사용자 생성
             const newUser = {
                 id: Date.now().toString(),
                 nickname: nickname,
@@ -220,65 +411,111 @@
                 password: hashPassword(password),
                 createdAt: new Date().toISOString()
             };
-
+            
+            console.log('Creating new user:', newUser);
+            
+            // 사용자 저장
             existingUsers.push(newUser);
             localStorage.setItem('ai_companion_users', JSON.stringify(existingUsers));
-
+            
+            // 로그인 처리
             currentUser = newUser;
             localStorage.setItem('ai_companion_user', JSON.stringify(currentUser));
+            
             showSuccess('register', '회원가입이 완료되었습니다!');
-            setTimeout(showMainApp, 1500);
+            
+            setTimeout(function() {
+                console.log('Showing main app after registration');
+                showMainApp();
+            }, 1500);
         }
 
         function handleLogin() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-
+            console.log('HandleLogin function called');
+            
+            const emailInput = document.getElementById('login-email');
+            const passwordInput = document.getElementById('login-password');
+            
+            if (!emailInput || !passwordInput) {
+                showError('login', '로그인 필드를 찾을 수 없습니다.');
+                return;
+            }
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            console.log('Login data:', { email: email });
+            
             if (!email || !password) {
                 showError('login', '이메일과 비밀번호를 입력해주세요.');
                 return;
             }
-
+            
+            // 사용자 확인
             const existingUsers = JSON.parse(localStorage.getItem('ai_companion_users') || '[]');
-            const user = existingUsers.find(u => u.email === email && u.password === hashPassword(password));
-
+            console.log('Existing users:', existingUsers.length);
+            
+            const user = existingUsers.find(function(u) { 
+                return u.email === email && u.password === hashPassword(password); 
+            });
+            
             if (!user) {
                 showError('login', '이메일 또는 비밀번호가 잘못되었습니다.');
                 return;
             }
-
+            
+            console.log('Login successful for user:', user.nickname);
+            
+            // 로그인 처리
             currentUser = user;
             localStorage.setItem('ai_companion_user', JSON.stringify(currentUser));
+            
             showSuccess('login', '로그인 성공!');
-            setTimeout(showMainApp, 1000);
+            
+            setTimeout(function() {
+                console.log('Showing main app after login');
+                showMainApp();
+            }, 1000);
         }
 
         function handleLogout() {
-            const oldUser = currentUser;
             currentUser = null;
             localStorage.removeItem('ai_companion_user');
             conversationHistory = {};
             
             const chatMessages = document.getElementById('chat-messages');
-            if(chatMessages) chatMessages.innerHTML = '';
+            const messageInput = document.getElementById('message-input');
+            
+            if (chatMessages) chatMessages.innerHTML = '';
+            if (messageInput) messageInput.value = '';
             
             showAuthModal();
         }
 
         function showError(type, message) {
-            const el = document.getElementById(`${type}-error`);
-            if (el) {
-                el.textContent = message;
-                el.style.color = '#ff4757';
+            const errorElement = type === 'login' ? 
+                document.getElementById('login-error') : 
+                document.getElementById('register-error');
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.color = '#ff4757';
             }
         }
 
         function showSuccess(type, message) {
-            const el = document.getElementById(type === 'login' ? 'login-error' : 'register-error');
-             if (el) {
-                el.textContent = message;
-                el.style.color = '#2ed573';
+            const errorElement = type === 'login' ? 
+                document.getElementById('login-error') : 
+                document.getElementById('register-error');
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.color = '#2ed573';
             }
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
         function hashPassword(password) {
@@ -291,13 +528,2037 @@
             return hash.toString();
         }
 
-        // 채팅 및 기타 함수들은 여기에 위치합니다. (생략)
-        function loadConversationHistory() { /* ... */ }
-        function sendMessage() { /* ... */ }
-        function switchCharacter(characterKey) { /* ... */ }
-        function toggleAPI() { /* ... */ }
-        
+        // 채팅 시스템
+        function initializeChat() {
+            addWelcomeMessage();
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
+        }
+
+        function addWelcomeMessage() {
+            const character = characters[currentCharacter];
+            setTimeout(function() {
+                addMessage('ai', character.greeting);
+            }, 500);
+        }
+
+        function switchCharacter(characterKey) {
+            currentCharacter = characterKey;
+            const character = characters[characterKey];
+            
+            const characterName = document.getElementById('character-name');
+            const characterEmoji = document.getElementById('character-emoji');
+            const characterStatus = document.getElementById('character-status');
+            
+            if (characterName) characterName.textContent = character.name;
+            if (characterEmoji) characterEmoji.textContent = character.emoji;
+            if (characterStatus) characterStatus.textContent = character.status;
+            
+            const characterOptions = document.querySelectorAll('.character-option');
+            characterOptions.forEach(function(opt) { 
+                opt.classList.remove('active'); 
+            });
+            
+            const selectedOption = document.querySelector('[data-character="' + characterKey + '"]');
+            if (selectedOption) selectedOption.classList.add('active');
+            
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                const avatar = typingIndicator.querySelector('.message-avatar');
+                if (avatar) avatar.textContent = character.emoji;
+            }
+            
+            addMessage('ai', character.greeting);
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            if (!messageInput) return;
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            addMessage('user', message);
+            messageInput.value = '';
+            
+            processAIResponse(message);
+        }
+
+        function processAIResponse(userMessage) {
+            showTypingIndicator();
+            
+            try {
+                if (useAPI) {
+                    console.log('Using Google AI API mode');
+                    addMessage('system', '🤖 Google AI 호출 중...');
+                    
+                    getGoogleAIResponse(userMessage)
+                        .then(function(response) {
+                            console.log('Google AI response received:', response);
+                            hideTypingIndicator();
+                            addMessage('ai', response);
+                            saveMessage(userMessage, response);
+                        })
+                        .catch(function(error) {
+                            console.error('API Error Details:', error);
+                            hideTypingIndicator();
+                            
+                            const errorMessage = 'Google AI API 오류: ' + error.message;
+                            addMessage('system', errorMessage);
+                            
+                            const fallbackResponse = getLocalResponse(userMessage) + ' (오프라인 모드로 전환)';
+                            addMessage('ai', fallbackResponse);
+                            
+                            useAPI = false;
+                            updateAPIToggle();
+                        });
+                } else {
+                    console.log('Using local mode');
+                    const response = getLocalResponse(userMessage);
+                    
+                    setTimeout(function() {
+                        hideTypingIndicator();
+                        addMessage('ai', response);
+                        saveMessage(userMessage, response);
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Process AI Response Error:', error);
+                hideTypingIndicator();
+                addMessage('ai', '오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        }
+
+        function getGoogleAIResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const history = getConversationHistory();
+            
+            const contents = [];
+            
+            contents.push({
+                role: 'user',
+                parts: [{ text: character.systemPrompt }]
+            });
+            contents.push({
+                role: 'model',
+                parts: [{ text: '네, 이해했습니다. 해당 캐릭터로 역할을 수행하겠습니다.' }]
+            });
+            
+            history.forEach(function(msg) {
+                contents.push({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                });
+            });
+            
+            contents.push({
+                role: 'user',
+                parts: [{ text: userMessage }]
+            });
+
+            const requestBody = {
+                contents: contents,
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024
+                }
+            };
+
+            console.log('Sending request to Google AI:', requestBody);
+            
+            return fetch(GOOGLE_API_URL + '?key=' + GOOGLE_API_KEY, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(function(response) {
+                console.log('Google AI Response Status:', response.status);
+                
+                if (!response.ok) {
+                    return response.text().then(function(errorText) {
+                        console.error('Google AI API Error:', response.status, errorText);
+                        throw new Error('Google AI API Error: ' + response.status + ' - ' + errorText);
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('Google AI Response Data:', data);
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Invalid response format from Google AI');
+                }
+            });
+        }
+
+        function getLocalResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const responses = {
+                ani: [
+                    '와! 그거 정말 재미있네요~ 😊 더 자세히 얘기해주세요!',
+                    '오늘도 즐거운 하루 보내시고 계시는군요! ✨',
+                    '그런 일이 있었군요! 저도 궁금해져요~ 💕'
+                ],
+                yuki: [
+                    '그렇군요... 깊이 생각해볼 만한 이야기네요.',
+                    '조용히 생각해보시는 시간도 필요할 것 같아요.',
+                    '마음이 편안해지길 바라요.'
+                ],
+                kai: [
+                    '흥미로운 질문이네요. 더 자세한 정보가 필요하다면 도움을 드릴 수 있습니다.',
+                    '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
+                    '정확한 정보를 제공하고 싶지만, 더 구체적인 질문이 필요할 것 같아요.'
+                ]
+            };
+            
+            const characterResponses = responses[currentCharacter] || responses.ani;
+            return characterResponses[Math.floor(Math.random() * characterResponses.length)];
+        }
+
+        function addMessage(sender, content) {
+            const chatMessages = document.getElementById('chat-messages');
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + sender;
+            
+            const character = characters[currentCharacter];
+            let emoji = sender === 'ai' ? character.emoji : '👤';
+            if (sender === 'system') emoji = '⚙️';
+            
+            messageDiv.innerHTML = '<div class="message-avatar">' + emoji + '</div>' +
+                                  '<div class="message-content">' + content + '</div>';
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'flex';
+                const chatMessages = document.getElementById('chat-messages');
+                if (chatMessages) {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'none';
+            }
+        }
+
+        function toggleAPI() {
+            useAPI = !useAPI;
+            updateAPIToggle();
+            
+            const statusMessage = useAPI ? 
+                '🤖 Google AI 모드가 활성화되었습니다.' : 
+                '💬 로컬 모드로 전환되었습니다.';
+            
+            addMessage('system', statusMessage);
+            
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
+        }
+
+        function updateAPIToggle() {
+            const apiToggle = document.getElementById('api-toggle');
+            const apiStatusText = document.getElementById('api-status-text');
+            
+            if (!apiToggle || !apiStatusText) return;
+            
+            const apiStatus = apiToggle.querySelector('.api-status');
+            if (!apiStatus) return;
+            
+            if (useAPI) {
+                apiStatus.textContent = '🤖';
+                apiStatusText.textContent = 'Google AI 연결됨';
+                apiToggle.style.background = 'linear-gradient(45deg, #4ade80, #22c55e)';
+                apiToggle.title = 'Google AI 모드 (활성)';
+            } else {
+                apiStatus.textContent = '💬';
+                apiStatusText.textContent = '로컬 모드 (오프라인)';
+                apiToggle.style.background = 'linear-gradient(45deg, #fbbf24, #f59e0b)';
+                apiToggle.title = '로컬 모드 (API 비활성)';
+            }
+        }
+
+        function testGoogleAPIConnection() {
+            console.log('Testing Google AI API connection...');
+            addMessage('system', '🔄 Google AI 연결 테스트 중...');
+            
+            fetch(GOOGLE_API_URL + '?key=' + GOOGLE_API_KEY, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: '안녕하세요' }]
+                    }],
+                    generationConfig: {
+                        maxOutputTokens: 50
+                    }
+                })
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json().then(function(data) {
+                        if (data.candidates && data.candidates[0]) {
+                            addMessage('system', '✅ Google AI 연결이 성공적으로 확인되었습니다!');
+                            console.log('Google AI connection test successful');
+                            sendDiscordNotification('✅ AI 컴패니언 사이트 - Google AI 연결 성공');
+                        } else {
+                            addMessage('system', '⚠️ Google AI 응답 형식에 문제가 있습니다.');
+                        }
+                    });
+                } else {
+                    return response.text().then(function(errorText) {
+                        console.error('Google AI connection test failed:', response.status, errorText);
+                        addMessage('system', '❌ Google AI 연결 실패: ' + response.status);
+                        sendDiscordNotification('❌ AI 컴패니언 사이트 - Google AI 연결 실패 (' + response.status + ')');
+                        
+                        if (response.status === 400 || response.status === 403) {
+                            addMessage('system', '🔑 API 키가 유효하지 않거나 권한이 없습니다. 로컬 모드로 전환됩니다.');
+                            useAPI = false;
+                            updateAPIToggle();
+                        }
+                    });
+                }
+            })
+            .catch(function(error) {
+                console.error('Google AI connection test error:', error);
+                addMessage('system', '❌ Google AI 연결 테스트 오류: ' + error.message);
+                sendDiscordNotification('❌ AI 컴패니언 사이트 - 연결 오류: ' + error.message);
+                useAPI = false;
+                updateAPIToggle();
+            });
+        }
+
+        // Discord 웹훅 알림 함수
+        function sendDiscordNotification(message) {
+            const webhookUrl = 'https://discord.com/api/webhooks/1416628521576431807/KnplV0HcHz7SkcgbDdlV28fohe0uzkV_5uoNouw4auSKFjYN7wEE2ulpNNu7QT1fNocM';
+            
+            const currentTime = new Date().toLocaleString('ko-KR', {
+                timeZone: 'Asia/Seoul',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const embed = {
+                title: "🤖 AI 컴패니언 사이트 상태",
+                description: message,
+                color: message.includes('✅') ? 0x00ff00 : message.includes('⚠️') ? 0xffff00 : 0xff0000,
+                fields: [
+                    {
+                        name: "📅 시간",
+                        value: currentTime,
+                        inline: true
+                    },
+                    {
+                        name: "👤 사용자",
+                        value: currentUser ? currentUser.nickname : "비로그인",
+                        inline: true
+                    },
+                    {
+                        name: "🌐 사이트 URL",
+                        value: window.location.href,
+                        inline: false
+                    }
+                ],
+                footer: {
+                    text: "AI 컴패니언 모니터링 시스템"
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            const payload = {
+                embeds: [embed]
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    console.log('Discord notification sent successfully');
+                } else {
+                    console.error('Failed to send Discord notification:', response.status);
+                }
+            })
+            .catch(function(error) {
+                console.error('Discord notification error:', error);
+            });
+        }
+
+        // 사이트 로드 시 Discord 알림
+        function sendSiteLoadNotification() {
+            const loadMessage = '🚀 AI 컴패니언 사이트가 로드되었습니다!';
+            sendDiscordNotification(loadMessage);
+        }
+
+        // 로그인/회원가입 성공시 Discord 알림
+        function sendUserActionNotification(action, userInfo) {
+            let actionMessage = '';
+            if (action === 'login') {
+                actionMessage = '🔐 사용자 로그인: ' + userInfo.nickname;
+            } else if (action === 'register') {
+                actionMessage = '📝 새 사용자 회원가입: ' + userInfo.nickname;
+            } else if (action === 'logout') {
+                actionMessage = '👋 사용자 로그아웃: ' + userInfo.nickname;
+            }
+            
+            sendDiscordNotification(actionMessage);
+        }
+
+        // 대화 기록 관리
+        function saveMessage(userMessage, aiResponse) {
+            if (!conversationHistory[currentCharacter]) {
+                conversationHistory[currentCharacter] = [];
+            }
+            
+            conversationHistory[currentCharacter].push(
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: aiResponse }
+            );
+            
+            if (conversationHistory[currentCharacter].length > 20) {
+                conversationHistory[currentCharacter] = conversationHistory[currentCharacter].slice(-20);
+            }
+            
+            saveConversationHistory();
+        }
+
+        function getConversationHistory() {
+            return conversationHistory[currentCharacter] ? conversationHistory[currentCharacter].slice(-10) : [];
+        }
+
+        function saveConversationHistory() {
+            if (currentUser) {
+                localStorage.setItem('ai_companion_history_' + currentUser.id, JSON.stringify(conversationHistory));
+            }
+        }
+
+        function loadConversationHistory() {
+            if (currentUser) {
+                const saved = localStorage.getItem('ai_companion_history_' + currentUser.id);
+                conversationHistory = saved ? JSON.parse(saved) : {};
+            }
+        }
+
+        // 수정된 로그인/회원가입 함수에 Discord 알림 추가
+        function handleLoginWithNotification() {
+            const originalHandleLogin = handleLogin;
+            handleLogin = function() {
+                originalHandleLogin();
+                if (currentUser) {
+                    sendUserActionNotification('login', currentUser);
+                }
+            };
+        }
+
+        function handleRegisterWithNotification() {
+            const originalHandleRegister = handleRegister;
+            handleRegister = function() {
+                originalHandleRegister();
+                if (currentUser) {
+                    sendUserActionNotification('register', currentUser);
+                }
+            };
+        }
+
+        function handleLogoutWithNotification() {
+            const originalHandleLogout = handleLogout;
+            handleLogout = function() {
+                const userInfo = currentUser;
+                originalHandleLogout();
+                if (userInfo) {
+                    sendUserActionNotification('logout', userInfo);
+                }
+            };
+        }
+
+        // 페이지 로드 완료 시 Discord 알림 전송
+        window.addEventListener('load', function() {
+            console.log('Page fully loaded');
+            sendSiteLoadNotification();
+        });
+
+        // 에러 모니터링
+        window.addEventListener('error', function(e) {
+            const errorMessage = '🚨 JavaScript 오류 발생: ' + e.message + ' (Line: ' + e.lineno + ')';
+            sendDiscordNotification(errorMessage);
+            console.error('Global error:', e);
+        });
+
+        // 초기화 완료 로그
         console.log('AI Companion script fully loaded');
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 컴패니언 - 가상 친구와 채팅</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 로그인/회원가입 모달 - 기본적으로 표시 -->
+    <div class="auth-overlay" id="auth-overlay" style="display: flex;">
+        <div class="auth-modal">
+            <!-- 로그인 폼 - 기본 표시 -->
+            <div class="auth-form" id="login-form" style="display: block;">
+                <h2>🤖 AI 컴패니언 로그인</h2>
+                <div class="form-container">
+                    <input type="email" id="login-email" placeholder="📧 이메일" required>
+                    <input type="password" id="login-password" placeholder="🔒 비밀번호" required>
+                    <button type="button" id="login-btn">로그인</button>
+                    <div class="error-message" id="login-error"></div>
+                </div>
+                <p>계정이 없으신가요? <a href="#" id="show-register">회원가입</a></p>
+                <div class="demo-account">
+                    <p><small>📌 데모 계정: test@test.com / 1234</small></p>
+                </div>
+            </div>
+
+            <!-- 회원가입 폼 - 기본 숨김 -->
+            <div class="auth-form" id="register-form" style="display: none;">
+                <h2>🌟 AI 컴패니언 회원가입</h2>
+                <div class="form-container">
+                    <input type="text" id="register-nickname" placeholder="👤 닉네임" required maxlength="10">
+                    <input type="email" id="register-email" placeholder="📧 이메일" required>
+                    <input type="password" id="register-password" placeholder="🔒 비밀번호" required minlength="4">
+                    <input type="password" id="register-confirm" placeholder="🔒 비밀번호 확인" required>
+                    <button type="button" id="register-btn">회원가입</button>
+                    <div class="error-message" id="register-error"></div>
+                </div>
+                <p>이미 계정이 있으신가요? <a href="#" id="show-login">로그인</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 채팅 화면 - 기본 숨김 -->
+    <div class="main-container" id="main-container" style="display: none;">
+        <div class="chat-container">
+            <div class="header">
+                <div class="character-info">
+                    <div class="character-main">
+                        <div class="character-avatar">
+                            <span id="character-emoji">👧</span>
+                        </div>
+                        <div class="character-details">
+                            <h2 id="character-name">Ani</h2>
+                            <div class="character-status" id="character-status">온라인 • 친절한 AI 컴패니언</div>
+                        </div>
+                    </div>
+                    <div class="user-info">
+                        <span id="user-nickname">사용자</span>
+                        <button class="logout-btn" id="logout-btn">로그아웃</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="character-selector">
+                <div class="character-option active" data-character="ani">
+                    👧 Ani (활발한 소녀)
+                </div>
+                <div class="character-option" data-character="yuki">
+                    ❄️ Yuki (차분한 친구)
+                </div>
+                <div class="character-option" data-character="kai">
+                    🤖 Kai (똑똑한 조수)
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <div class="welcome-content">
+                        <h3>🎉 AI 컴패니언에 오신 것을 환영합니다!</h3>
+                        <p>원하는 캐릭터를 선택하고 대화를 시작해보세요!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                <div class="message-avatar">👧</div>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <span class="typing-text">응답 중...</span>
+            </div>
+
+            <div class="input-area">
+                <div class="input-controls">
+                    <button class="api-toggle" id="api-toggle" title="Google AI 모드">
+                        <span class="api-status">🤖</span>
+                    </button>
+                    <input type="text" class="message-input" id="message-input" placeholder="메시지를 입력하세요..." maxlength="500">
+                    <button class="send-button" id="send-button">
+                        <span>전송</span>
+                    </button>
+                </div>
+                <div class="api-status-text" id="api-status-text">Google AI 연결됨</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentUser = null;
+        let currentCharacter = 'ani';
+        let useAPI = true;
+        let conversationHistory = {};
+        
+        // Google AI API 설정
+        const GOOGLE_API_KEY = 'AIzaSyAOxpnkAq7nJhdR1FvIm_fkxE4jiSBmEsQ';
+        const GOOGLE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+
+        // 캐릭터 설정
+        const characters = {
+            ani: {
+                name: 'Ani',
+                emoji: '👧',
+                greeting: '안녕하세요! 저는 Ani예요~ 🌸 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕',
+                systemPrompt: '너는 활발하고 귀여운 일본 애니메이션 소녀 캐릭터 "Ani"야. 항상 밝고 긍정적이며, 이모지를 자주 사용해. 한국어로 대화하고, 친근하고 장난기 있는 말투를 써. 사용자를 친구처럼 대해. 대답은 2-3문장으로 간결하게.',
+                status: '온라인 • 활발한 소녀'
+            },
+            yuki: {
+                name: 'Yuki',
+                emoji: '❄️',
+                greeting: '안녕하세요. 저는 Yuki입니다 ❄️ 조용한 대화를 나누면서 편안한 시간을 보내요.',
+                systemPrompt: '너는 차분하고 지적인 캐릭터 "Yuki"야. 조용하고 사려깊은 성격이며, 깊이 있는 대화를 좋아해. 한국어로 정중하고 부드러운 말투로 대화해. 철학적이고 감성적인 면이 있어. 대답은 차분하고 생각깊게.',
+                status: '온라인 • 차분한 친구'
+            },
+            kai: {
+                name: 'Kai',
+                emoji: '🤖',
+                greeting: '안녕하세요! Kai입니다 🤖 궁금한 것이 있으시면 언제든 물어보세요!',
+                systemPrompt: '너는 똑똑하고 도움이 되는 AI 어시스턴트 "Kai"야. 정확한 정보를 제공하고, 논리적으로 생각하며, 사용자의 질문에 친절하게 답변해. 한국어로 정중하되 친근한 말투를 써. 전문적이지만 따뜻해.',
+                status: '온라인 • 똑똑한 조수'
+            }
+        };
+
+        // DOM 요소들
+        const elements = {
+            authOverlay: null,
+            loginForm: null,
+            registerForm: null,
+            mainContainer: null,
+            loginEmail: null,
+            loginPassword: null,
+            loginBtn: null,
+            loginError: null,
+            registerNickname: null,
+            registerEmail: null,
+            registerPassword: null,
+            registerConfirm: null,
+            registerBtn: null,
+            registerError: null,
+            chatMessages: null,
+            messageInput: null,
+            sendButton: null,
+            typingIndicator: null,
+            characterName: null,
+            characterEmoji: null,
+            characterStatus: null,
+            userNickname: null,
+            logoutBtn: null,
+            apiToggle: null,
+            apiStatusText: null
+        };
+
+        // DOM 로드 후 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            initializeElements();
+            initializeApp();
+            bindEvents();
+            
+            window.debugAuth = {
+                showRegister: () => showRegisterForm(),
+                showLogin: () => showLoginForm(),
+                testLogin: () => handleLogin(),
+                testRegister: () => handleRegister()
+            };
+            
+            console.log('App initialized. Try window.debugAuth for testing.');
+        });
+
+        function initializeElements() {
+            elements.authOverlay = document.getElementById('auth-overlay');
+            elements.loginForm = document.getElementById('login-form');
+            elements.registerForm = document.getElementById('register-form');
+            elements.mainContainer = document.getElementById('main-container');
+            elements.loginEmail = document.getElementById('login-email');
+            elements.loginPassword = document.getElementById('login-password');
+            elements.loginBtn = document.getElementById('login-btn');
+            elements.loginError = document.getElementById('login-error');
+            elements.registerNickname = document.getElementById('register-nickname');
+            elements.registerEmail = document.getElementById('register-email');
+            elements.registerPassword = document.getElementById('register-password');
+            elements.registerConfirm = document.getElementById('register-confirm');
+            elements.registerBtn = document.getElementById('register-btn');
+            elements.registerError = document.getElementById('register-error');
+            elements.chatMessages = document.getElementById('chat-messages');
+            elements.messageInput = document.getElementById('message-input');
+            elements.sendButton = document.getElementById('send-button');
+            elements.typingIndicator = document.getElementById('typing-indicator');
+            elements.characterName = document.getElementById('character-name');
+            elements.characterEmoji = document.getElementById('character-emoji');
+            elements.characterStatus = document.getElementById('character-status');
+            elements.userNickname = document.getElementById('user-nickname');
+            elements.logoutBtn = document.getElementById('logout-btn');
+            elements.apiToggle = document.getElementById('api-toggle');
+            elements.apiStatusText = document.getElementById('api-status-text');
+
+            console.log('Elements initialized:', {
+                authOverlay: !!elements.authOverlay,
+                loginBtn: !!elements.loginBtn,
+                registerBtn: !!elements.registerBtn
+            });
+        }
+
+        function initializeApp() {
+            const savedUser = localStorage.getItem('ai_companion_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            } else {
+                showAuthModal();
+            }
+            loadConversationHistory();
+        }
+
+        function bindEvents() {
+            const showRegisterLink = document.getElementById('show-register');
+            const showLoginLink = document.getElementById('show-login');
+            
+            if (showRegisterLink) {
+                showRegisterLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Show register clicked');
+                    showRegisterForm();
+                });
+            }
+            
+            if (showLoginLink) {
+                showLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Show login clicked');
+                    showLoginForm();
+                });
+            }
+            
+            if (elements.registerBtn) {
+                elements.registerBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Register button clicked');
+                    handleRegister();
+                });
+            }
+            
+            if (elements.loginBtn) {
+                elements.loginBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Login button clicked');
+                    handleLogin();
+                });
+            }
+            
+            if (elements.loginPassword) {
+                elements.loginPassword.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleLogin();
+                    }
+                });
+            }
+            
+            if (elements.registerConfirm) {
+                elements.registerConfirm.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleRegister();
+                    }
+                });
+            }
+            
+            if (elements.logoutBtn) {
+                elements.logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Logout clicked');
+                    handleLogout();
+                });
+            }
+            
+            if (elements.sendButton) {
+                elements.sendButton.addEventListener('click', sendMessage);
+            }
+            
+            if (elements.messageInput) {
+                elements.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+            
+            if (elements.apiToggle) {
+                elements.apiToggle.addEventListener('click', toggleAPI);
+            }
+            
+            document.querySelectorAll('.character-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const character = e.target.getAttribute('data-character');
+                    if (character) {
+                        console.log('Character selected:', character);
+                        switchCharacter(character);
+                    }
+                });
+            });
+            
+            console.log('All events bound successfully');
+        }
+
+        // 인증 시스템
+        function showAuthModal() {
+            console.log('Showing auth modal');
+            const authOverlay = document.getElementById('auth-overlay');
+            const mainContainer = document.getElementById('main-container');
+            
+            if (authOverlay) authOverlay.style.display = 'flex';
+            if (mainContainer) mainContainer.style.display = 'none';
+        }
+
+        function showMainApp() {
+            console.log('Showing main app');
+            const authOverlay = document.getElementById('auth-overlay');
+            const mainContainer = document.getElementById('main-container');
+            
+            if (authOverlay) authOverlay.style.display = 'none';
+            if (mainContainer) mainContainer.style.display = 'flex';
+            
+            if (currentUser && elements.userNickname) {
+                elements.userNickname.textContent = currentUser.nickname;
+            }
+            initializeChat();
+        }
+
+        function showRegisterForm() {
+            console.log('Showing register form');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (loginForm) loginForm.style.display = 'none';
+            if (registerForm) registerForm.style.display = 'block';
+            clearErrors();
+            
+            setTimeout(() => {
+                const nicknameInput = document.getElementById('register-nickname');
+                if (nicknameInput) nicknameInput.focus();
+            }, 100);
+        }
+
+        function showLoginForm() {
+            console.log('Showing login form');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (registerForm) registerForm.style.display = 'none';
+            if (loginForm) loginForm.style.display = 'block';
+            clearErrors();
+            
+            setTimeout(() => {
+                const emailInput = document.getElementById('login-email');
+                if (emailInput) emailInput.focus();
+            }, 100);
+        }
+
+        function clearErrors() {
+            if (elements.loginError) elements.loginError.textContent = '';
+            if (elements.registerError) elements.registerError.textContent = '';
+        }
+
+        function handleRegister() {
+            console.log('HandleRegister function called');
+            
+            const nickname = elements.registerNickname.value.trim();
+            const email = elements.registerEmail.value.trim();
+            const password = elements.registerPassword.value;
+            const confirmPassword = elements.registerConfirm.value;
+            
+            console.log('Register data:', { nickname, email, password: '***', confirmPassword: '***' });
+            
+            if (!nickname || !email || !password || !confirmPassword) {
+                showError('register', '모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('register', '비밀번호가 일치하지 않습니다.');
+                return;
+            }
+            
+            if (password.length < 4) {
+                showError('register', '비밀번호는 4자 이상이어야 합니다.');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showError('register', '올바른 이메일 형식이 아닙니다.');
+                return;
+            }
+            
+            const existingUsers = JSON.parse(localStorage.getItem('ai_companion_users') || '[]');
+            if (existingUsers.some(user => user.email === email)) {
+                showError('register', '이미 가입된 이메일입니다.');
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now().toString(),
+                nickname: nickname,
+                email: email,
+                password: hashPassword(password),
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('Creating new user:', newUser);
+            
+            existingUsers.push(newUser);
+            localStorage.setItem('ai_companion_users', JSON.stringify(existingUsers));
+            
+            currentUser = newUser;
+            localStorage.setItem('ai_companion_user', JSON.stringify(currentUser));
+            
+            showSuccess('register', '회원가입이 완료되었습니다!');
+            
+            setTimeout(() => {
+                console.log('Showing main app after registration');
+                showMainApp();
+            }, 1500);
+        }
+
+        function handleLogin() {
+            console.log('HandleLogin function called');
+            
+            const email = elements.loginEmail.value.trim();
+            const password = elements.loginPassword.value;
+            
+            console.log('Login data:', { email, password: '***' });
+            
+            if (!email || !password) {
+                showError('login', '이메일과 비밀번호를 입력해주세요.');
+                return;
+            }
+            
+            const existingUsers = JSON.parse(localStorage.getItem('ai_companion_users') || '[]');
+            console.log('Existing users:', existingUsers.length);
+            
+            const user = existingUsers.find(u => u.email === email && u.password === hashPassword(password));
+            
+            if (!user) {
+                showError('login', '이메일 또는 비밀번호가 잘못되었습니다.');
+                return;
+            }
+            
+            console.log('Login successful for user:', user.nickname);
+            
+            currentUser = user;
+            localStorage.setItem('ai_companion_user', JSON.stringify(currentUser));
+            
+            showSuccess('login', '로그인 성공!');
+            
+            setTimeout(() => {
+                console.log('Showing main app after login');
+                showMainApp();
+            }, 1000);
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('ai_companion_user');
+            conversationHistory = {};
+            
+            if (elements.chatMessages) elements.chatMessages.innerHTML = '';
+            if (elements.messageInput) elements.messageInput.value = '';
+            
+            showAuthModal();
+        }
+
+        function showError(type, message) {
+            const errorElement = type === 'login' ? elements.loginError : elements.registerError;
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.color = '#ff4757';
+            }
+        }
+
+        function showSuccess(type, message) {
+            const errorElement = type === 'login' ? elements.loginError : elements.registerError;
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.color = '#2ed573';
+            }
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString();
+        }
+
+        // 채팅 시스템
+        function initializeChat() {
+            addWelcomeMessage();
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
+        }
+
+        function addWelcomeMessage() {
+            const character = characters[currentCharacter];
+            setTimeout(() => {
+                addMessage('ai', character.greeting);
+            }, 500);
+        }
+
+        function switchCharacter(characterKey) {
+            currentCharacter = characterKey;
+            const character = characters[characterKey];
+            
+            if (elements.characterName) elements.characterName.textContent = character.name;
+            if (elements.characterEmoji) elements.characterEmoji.textContent = character.emoji;
+            if (elements.characterStatus) elements.characterStatus.textContent = character.status;
+            
+            document.querySelectorAll('.character-option').forEach(opt => opt.classList.remove('active'));
+            const selectedOption = document.querySelector(`[data-character="${characterKey}"]`);
+            if (selectedOption) selectedOption.classList.add('active');
+            
+            if (elements.typingIndicator) {
+                const avatar = elements.typingIndicator.querySelector('.message-avatar');
+                if (avatar) avatar.textContent = character.emoji;
+            }
+            
+            addMessage('ai', character.greeting);
+        }
+
+        async function sendMessage() {
+            if (!elements.messageInput) return;
+            
+            const message = elements.messageInput.value.trim();
+            if (!message) return;
+            
+            addMessage('user', message);
+            elements.messageInput.value = '';
+            
+            await processAIResponse(message);
+        }
+
+        async function processAIResponse(userMessage) {
+            showTypingIndicator();
+            
+            try {
+                let response;
+                if (useAPI) {
+                    console.log('Using Google AI API mode');
+                    addMessage('system', '🤖 Google AI 호출 중...');
+                    response = await getGoogleAIResponse(userMessage);
+                    console.log('Google AI response received:', response);
+                } else {
+                    console.log('Using local mode');
+                    response = getLocalResponse(userMessage);
+                }
+                
+                hideTypingIndicator();
+                addMessage('ai', response);
+                
+                saveMessage(userMessage, response);
+                
+            } catch (error) {
+                console.error('API Error Details:', error);
+                hideTypingIndicator();
+                
+                const errorMessage = `❌ Google AI API 오류: ${error.message}`;
+                addMessage('system', errorMessage);
+                
+                const fallbackResponse = getLocalResponse(userMessage) + ' (오프라인 모드로 전환)';
+                addMessage('ai', fallbackResponse);
+                
+                useAPI = false;
+                updateAPIToggle();
+            }
+        }
+
+        async function getGoogleAIResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const history = getConversationHistory();
+            
+            const contents = [];
+            
+            contents.push({
+                role: 'user',
+                parts: [{ text: character.systemPrompt }]
+            });
+            contents.push({
+                role: 'model',
+                parts: [{ text: '네, 이해했습니다. 해당 캐릭터로 역할을 수행하겠습니다.' }]
+            });
+            
+            history.forEach(msg => {
+                contents.push({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                });
+            });
+            
+            contents.push({
+                role: 'user',
+                parts: [{ text: userMessage }]
+            });
+
+            const requestBody = {
+                contents: contents,
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024,
+                }
+            };
+
+            console.log('Sending request to Google AI:', requestBody);
+            
+            const response = await fetch(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            console.log('Google AI Response Status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Google AI API Error:', response.status, errorText);
+                throw new Error(`Google AI API Error: ${response.status} - ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Google AI Response Data:', data);
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Invalid response format from Google AI');
+            }
+        }
+
+        function getLocalResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const responses = {
+                ani: [
+                    '와! 그거 정말 재미있네요~ 😊 더 자세히 얘기해주세요!',
+                    '오늘도 즐거운 하루 보내시고 계시는군요! ✨',
+                    '그런 일이 있었군요! 저도 궁금해져요~ 💕'
+                ],
+                yuki: [
+                    '그렇군요... 깊이 생각해볼 만한 이야기네요.',
+                    '조용히 생각해보시는 시간도 필요할 것 같아요.',
+                    '마음이 편안해지길 바라요.'
+                ],
+                kai: [
+                    '흥미로운 질문이네요. 더 자세한 정보가 필요하다면 도움을 드릴 수 있습니다.',
+                    '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
+                    '정확한 정보를 제공하고 싶지만, 더 구체적인 질문이 필요할 것 같아요.'
+                ]
+            };
+            
+            const characterResponses = responses[currentCharacter] || responses.ani;
+            return characterResponses[Math.floor(Math.random() * characterResponses.length)];
+        }
+
+        function addMessage(sender, content) {
+            if (!elements.chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const character = characters[currentCharacter];
+            let emoji = sender === 'ai' ? character.emoji : '👤';
+            if (sender === 'system') emoji = '⚙️';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${emoji}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            elements.chatMessages.appendChild(messageDiv);
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            if (elements.typingIndicator) {
+                elements.typingIndicator.classList.remove('hidden');
+                if (elements.chatMessages) {
+                    elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+                }
+            }
+        }
+
+        function hideTypingIndicator() {
+            if (elements.typingIndicator) {
+                elements.typingIndicator.classList.add('hidden');
+            }
+        }
+
+        function toggleAPI() {
+            useAPI = !useAPI;
+            updateAPIToggle();
+            
+            const statusMessage = useAPI ? 
+                '🤖 Google AI 모드가 활성화되었습니다.' : 
+                '💬 로컬 모드로 전환되었습니다.';
+            
+            addMessage('system', statusMessage);
+            
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
+        }
+
+        function updateAPIToggle() {
+            if (!elements.apiToggle || !elements.apiStatusText) return;
+            
+            const apiStatus = elements.apiToggle.querySelector('.api-status');
+            if (!apiStatus) return;
+            
+            if (useAPI) {
+                apiStatus.textContent = '🤖';
+                elements.apiStatusText.textContent = 'Google AI 연결됨';
+                elements.apiToggle.style.background = 'linear-gradient(45deg, #4ade80, #22c55e)';
+                elements.apiToggle.title = 'Google AI 모드 (활성)';
+            } else {
+                apiStatus.textContent = '💬';
+                elements.apiStatusText.textContent = '로컬 모드 (오프라인)';
+                elements.apiToggle.style.background = 'linear-gradient(45deg, #fbbf24, #f59e0b)';
+                elements.apiToggle.title = '로컬 모드 (API 비활성)';
+            }
+        }
+
+        async function testGoogleAPIConnection() {
+            try {
+                console.log('Testing Google AI API connection...');
+                addMessage('system', '🔄 Google AI 연결 테스트 중...');
+                
+                const testResponse = await fetch(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            role: 'user',
+                            parts: [{ text: '안녕하세요' }]
+                        }],
+                        generationConfig: {
+                            maxOutputTokens: 50
+                        }
+                    })
+                });
+                
+                if (testResponse.ok) {
+                    const testData = await testResponse.json();
+                    if (testData.candidates && testData.candidates[0]) {
+                        addMessage('system', '✅ Google AI 연결이 성공적으로 확인되었습니다!');
+                        console.log('Google AI connection test successful');
+                    } else {
+                        addMessage('system', '⚠️ Google AI 응답 형식에 문제가 있습니다.');
+                    }
+                } else {
+                    const errorText = await testResponse.text();
+                    console.error('Google AI connection test failed:', testResponse.status, errorText);
+                    addMessage('system', `❌ Google AI 연결 실패: ${testResponse.status}`);
+                    
+                    if (testResponse.status === 400 || testResponse.status === 403) {
+                        addMessage('system', '🔑 API 키가 유효하지 않거나 권한이 없습니다. 로컬 모드로 전환됩니다.');
+                        useAPI = false;
+                        updateAPIToggle();
+                    }
+                }
+            } catch (error) {
+                console.error('Google AI connection test error:', error);
+                addMessage('system', `❌ Google AI 연결 테스트 오류: ${error.message}`);
+                useAPI = false;
+                updateAPIToggle();
+            }
+        }
+
+        // 대화 기록 관리
+        function saveMessage(userMessage, aiResponse) {
+            if (!conversationHistory[currentCharacter]) {
+                conversationHistory[currentCharacter] = [];
+            }
+            
+            conversationHistory[currentCharacter].push(
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: aiResponse }
+            );
+            
+            if (conversationHistory[currentCharacter].length > 20) {
+                conversationHistory[currentCharacter] = conversationHistory[currentCharacter].slice(-20);
+            }
+            
+            saveConversationHistory();
+        }
+
+        function getConversationHistory() {
+            return conversationHistory[currentCharacter]?.slice(-10) || [];
+        }
+
+        function saveConversationHistory() {
+            if (currentUser) {
+                localStorage.setItem(`ai_companion_history_${currentUser.id}`, JSON.stringify(conversationHistory));
+            }
+        }
+
+        function loadConversationHistory() {
+            if (currentUser) {
+                const saved = localStorage.getItem(`ai_companion_history_${currentUser.id}`);
+                conversationHistory = saved ? JSON.parse(saved) : {};
+            }
+        }
+    </script>것이 있으시면 언제든 물어보세요!',
+                systemPrompt: '너는 똑똑하고 도움이 되는 AI 어시스턴트 "Kai"야. 정확한 정보를 제공하고, 논리적으로 생각하며, 사용자의 질문에 친절하게 답변해. 한국어로 정중하되 친근한 말투를 써. 전문적이지만 따뜻해.',
+                status: '온라인 • 똑똑한 조수'
+            }
+        };
+
+        // DOM 요소들
+        const elements = {
+            // 인증 관련
+            authOverlay: document.getElementById('auth-overlay'),
+            loginForm: document.getElementById('login-form'),
+            registerForm: document.getElementById('register-form'),
+            mainContainer: document.getElementById('main-container'),
+            
+            // 로그인
+            loginEmail: document.getElementById('login-email'),
+            loginPassword: document.getElementById('login-password'),
+            loginBtn: document.getElementById('login-btn'),
+            loginError: document.getElementById('login-error'),
+            
+            // 회원가입
+            registerNickname: document.getElementById('register-nickname'),
+            registerEmail: document.getElementById('register-email'),
+            registerPassword: document.getElementById('register-password'),
+            registerConfirm: document.getElementById('register-confirm'),
+            registerBtn: document.getElementById('register-btn'),
+            registerError: document.getElementById('register-error'),
+            
+            // 메인 화면
+            chatMessages: document.getElementById('chat-messages'),
+            messageInput: document.getElementById('message-input'),
+            sendButton: document.getElementById('send-button'),
+            typingIndicator: document.getElementById('typing-indicator'),
+            characterName: document.getElementById('character-name'),
+            characterEmoji: document.getElementById('character-emoji'),
+            characterStatus: document.getElementById('character-status'),
+            userNickname: document.getElementById('user-nickname'),
+            logoutBtn: document.getElementById('logout-btn'),
+            apiToggle: document.getElementById('api-toggle'),
+            apiStatusText: document.getElementById('api-status-text')
+        };
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            console.log('Elements check:', {
+                authOverlay: !!document.getElementById('auth-overlay'),
+                loginForm: !!document.getElementById('login-form'),
+                registerForm: !!document.getElementById('register-form'),
+                loginBtn: !!document.getElementById('login-btn'),
+                registerBtn: !!document.getElementById('register-btn')
+            });
+            
+            initializeApp();
+            bindEvents();
+            
+            // 디버그용 전역 함수 추가
+            window.debugAuth = {
+                showRegister: () => showRegisterForm(),
+                showLogin: () => showLoginForm(),
+                testLogin: () => handleLogin(),
+                testRegister: () => handleRegister()
+            };
+            
+            console.log('App initialized. Try window.debugAuth for testing.');
+        });
+
+        function initializeApp() {
+            // 저장된 사용자 확인
+            const savedUser = localStorage.getItem('ai_companion_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            } else {
+                showAuthModal();
+            }
+            
+            // 대화 기록 불러오기
+            loadConversationHistory();
+        }
+
+        function bindEvents() {
+            // 폼 전환 이벤트
+            const showRegisterLink = document.getElementById('show-register');
+            const showLoginLink = document.getElementById('show-login');
+            
+            if (showRegisterLink) {
+                showRegisterLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Show register clicked');
+                    showRegisterForm();
+                });
+            }
+            
+            if (showLoginLink) {
+                showLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Show login clicked');
+                    showLoginForm();
+                });
+            }
+            
+            // 회원가입/로그인 버튼
+            if (elements.registerBtn) {
+                elements.registerBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Register button clicked');
+                    handleRegister();
+                });
+            }
+            
+            if (elements.loginBtn) {
+                elements.loginBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Login button clicked');
+                    handleLogin();
+                });
+            }
+            
+            // Enter 키로 폼 제출
+            if (elements.loginPassword) {
+                elements.loginPassword.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleLogin();
+                    }
+                });
+            }
+            
+            if (elements.registerConfirm) {
+                elements.registerConfirm.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleRegister();
+                    }
+                });
+            }
+            
+            // 로그아웃
+            if (elements.logoutBtn) {
+                elements.logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Logout clicked');
+                    handleLogout();
+                });
+            }
+            
+            // 채팅 관련
+            if (elements.sendButton) {
+                elements.sendButton.addEventListener('click', sendMessage);
+            }
+            
+            if (elements.messageInput) {
+                elements.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+            
+            // API 토글
+            if (elements.apiToggle) {
+                elements.apiToggle.addEventListener('click', toggleAPI);
+            }
+            
+            // 캐릭터 선택
+            document.querySelectorAll('.character-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    const character = e.target.getAttribute('data-character');
+                    if (character) {
+                        console.log('Character selected:', character);
+                        switchCharacter(character);
+                    }
+                });
+            });
+            
+            console.log('All events bound successfully');
+        }
+
+        // 인증 시스템
+        function showAuthModal() {
+            elements.authOverlay.classList.remove('hidden');
+            elements.mainContainer.classList.add('hidden');
+        }
+
+        // 인증 시스템
+        function showAuthModal() {
+            elements.authOverlay.classList.remove('hidden');
+            elements.mainContainer.classList.add('hidden');
+        }
+
+        function showMainApp() {
+            elements.authOverlay.classList.add('hidden');
+            elements.mainContainer.classList.remove('hidden');
+            if (currentUser) {
+                elements.userNickname.textContent = currentUser.nickname;
+            }
+            initializeChat();
+        }
+
+        function showRegisterForm() {
+            console.log('Showing register form');
+            elements.loginForm.classList.add('hidden');
+            elements.registerForm.classList.remove('hidden');
+            clearErrors();
+            
+            // 포커스 설정
+            setTimeout(() => {
+                if (elements.registerNickname) {
+                    elements.registerNickname.focus();
+                }
+            }, 100);
+        }
+
+        function showLoginForm() {
+            console.log('Showing login form');
+            elements.registerForm.classList.add('hidden');
+            elements.loginForm.classList.remove('hidden');
+            clearErrors();
+            
+            // 포커스 설정
+            setTimeout(() => {
+                if (elements.loginEmail) {
+                    elements.loginEmail.focus();
+                }
+            }, 100);
+        }
+
+        function clearErrors() {
+            elements.loginError.textContent = '';
+            elements.registerError.textContent = '';
+        }
+
+        function handleRegister() {
+            console.log('HandleRegister function called');
+            
+            const nickname = elements.registerNickname.value.trim();
+            const email = elements.registerEmail.value.trim();
+            const password = elements.registerPassword.value;
+            const confirmPassword = elements.registerConfirm.value;
+            
+            console.log('Register data:', { nickname, email, password: '***', confirmPassword: '***' });
+            
+            // 유효성 검사
+            if (!nickname || !email || !password || !confirmPassword) {
+                showError('register', '모든 필드를 입력해주세요.');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('register', '비밀번호가 일치하지 않습니다.');
+                return;
+            }
+            
+            if (password.length < 4) {
+                showError('register', '비밀번호는 4자 이상이어야 합니다.');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showError('register', '올바른 이메일 형식이 아닙니다.');
+                return;
+            }
+            
+            // 중복 사용자 확인
+            const existingUsers = JSON.parse(localStorage.getItem('ai_companion_users') || '[]');
+            if (existingUsers.some(user => user.email === email)) {
+                showError('register', '이미 가입된 이메일입니다.');
+                return;
+            }
+            
+            // 새 사용자 생성
+            const newUser = {
+                id: Date.now().toString(),
+                nickname: nickname,
+                email: email,
+                password: hashPassword(password),
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('Creating new user:', newUser);
+            
+            // 사용자 저장
+            existingUsers.push(newUser);
+            localStorage.setItem('ai_companion_users', JSON.stringify(existingUsers));
+            
+            // 로그인 처리
+            currentUser = newUser;
+            localStorage.setItem('ai_companion_user', JSON.stringify(currentUser));
+            
+            showSuccess('register', '회원가입이 완료되었습니다!');
+            
+            setTimeout(() => {
+                console.log('Showing main app after registration');
+                showMainApp();
+            }, 1500);
+        }
+
+        function handleLogin() {
+            console.log('HandleLogin function called');
+            
+            const email = elements.loginEmail.value.trim();
+            const password = elements.loginPassword.value;
+            
+            console.log('Login data:', { email, password: '***' });
+            
+            if (!email || !password) {
+                showError('login', '이메일과 비밀번호를 입력해주세요.');
+                return;
+            }
+            
+            // 사용자 확인
+            const existingUsers = JSON.parse(localStorage.getItem('ai_companion_users') || '[]');
+            console.log('Existing users:', existingUsers.length);
+            
+            const user = existingUsers.find(u => u.email === email && u.password === hashPassword(password));
+            
+            if (!user) {
+                showError('login', '이메일 또는 비밀번호가 잘못되었습니다.');
+                return;
+            }
+            
+            console.log('Login successful for user:', user.nickname);
+            
+            // 로그인 처리
+            currentUser = user;
+            localStorage.setItem('ai_companion_user', JSON.stringify(currentUser));
+            
+            showSuccess('login', '로그인 성공!');
+            
+            setTimeout(() => {
+                console.log('Showing main app after login');
+                showMainApp();
+            }, 1000);
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('ai_companion_user');
+            conversationHistory = {};
+            
+            // 채팅 화면 초기화
+            elements.chatMessages.innerHTML = '';
+            elements.messageInput.value = '';
+            
+            showAuthModal();
+        }
+
+        function showError(type, message) {
+            const errorElement = type === 'login' ? elements.loginError : elements.registerError;
+            errorElement.textContent = message;
+            errorElement.style.color = '#ff4757';
+        }
+
+        function showSuccess(type, message) {
+            const errorElement = type === 'login' ? elements.loginError : elements.registerError;
+            errorElement.textContent = message;
+            errorElement.style.color = '#2ed573';
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function hashPassword(password) {
+            // 간단한 해시 (실제 운영에서는 더 강력한 해시 사용 필요)
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString();
+        }
+
+        // 채팅 시스템
+        function initializeChat() {
+            // 환영 메시지 표시
+            addWelcomeMessage();
+            // Google AI 연결 테스트
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
+        }
+
+        function addWelcomeMessage() {
+            const character = characters[currentCharacter];
+            setTimeout(() => {
+                addMessage('ai', character.greeting);
+            }, 500);
+        }
+
+        function switchCharacter(characterKey) {
+            currentCharacter = characterKey;
+            const character = characters[characterKey];
+            
+            // UI 업데이트
+            elements.characterName.textContent = character.name;
+            elements.characterEmoji.textContent = character.emoji;
+            elements.characterStatus.textContent = character.status;
+            
+            // 활성 캐릭터 표시
+            document.querySelectorAll('.character-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelector(`[data-character="${characterKey}"]`).classList.add('active');
+            
+            // 타이핑 인디케이터 업데이트
+            elements.typingIndicator.querySelector('.message-avatar').textContent = character.emoji;
+            
+            // 인사 메시지
+            addMessage('ai', character.greeting);
+        }
+
+        async function sendMessage() {
+            const message = elements.messageInput.value.trim();
+            if (!message) return;
+            
+            // 사용자 메시지 표시
+            addMessage('user', message);
+            elements.messageInput.value = '';
+            
+            // AI 응답 처리
+            await processAIResponse(message);
+        }
+
+        async function processAIResponse(userMessage) {
+            showTypingIndicator();
+            
+            try {
+                let response;
+                if (useAPI) {
+                    console.log('Using Google AI API mode');
+                    addMessage('system', '🤖 Google AI 호출 중...');
+                    response = await getGoogleAIResponse(userMessage);
+                    console.log('Google AI response received:', response);
+                } else {
+                    console.log('Using local mode');
+                    response = getLocalResponse(userMessage);
+                }
+                
+                hideTypingIndicator();
+                addMessage('ai', response);
+                
+                // 대화 기록 저장
+                saveMessage(userMessage, response);
+                
+            } catch (error) {
+                console.error('API Error Details:', error);
+                hideTypingIndicator();
+                
+                // 에러 메시지를 사용자에게 표시
+                const errorMessage = `❌ Google AI API 오류: ${error.message}`;
+                addMessage('system', errorMessage);
+                
+                // 폴백 응답
+                const fallbackResponse = getLocalResponse(userMessage) + ' (오프라인 모드로 전환)';
+                addMessage('ai', fallbackResponse);
+                
+                // API 모드를 자동으로 로컬 모드로 전환
+                useAPI = false;
+                updateAPIToggle();
+            }
+        }
+
+        function updateAPIToggle() {
+            const apiStatus = elements.apiToggle.querySelector('.api-status');
+            
+            if (useAPI) {
+                apiStatus.textContent = '🤖';
+                elements.apiStatusText.textContent = 'OpenAI API 연결됨';
+                elements.apiToggle.style.background = 'linear-gradient(45deg, #4ade80, #22c55e)';
+                elements.apiToggle.title = 'OpenAI API 모드 (활성)';
+            } else {
+                apiStatus.textContent = '💬';
+                elements.apiStatusText.textContent = '로컬 모드 (오프라인)';
+                elements.apiToggle.style.background = 'linear-gradient(45deg, #fbbf24, #f59e0b)';
+                elements.apiToggle.title = '로컬 모드 (API 비활성)';
+            }
+        }
+
+        async function getGoogleAIResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const history = getConversationHistory();
+            
+            // 대화 히스토리를 Google AI 형식으로 변환
+            const contents = [];
+            
+            // 시스템 프롬프트 추가
+            contents.push({
+                role: 'user',
+                parts: [{ text: character.systemPrompt }]
+            });
+            contents.push({
+                role: 'model',
+                parts: [{ text: '네, 이해했습니다. 해당 캐릭터로 역할을 수행하겠습니다.' }]
+            });
+            
+            // 대화 히스토리 추가
+            history.forEach(msg => {
+                contents.push({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                });
+            });
+            
+            // 현재 사용자 메시지 추가
+            contents.push({
+                role: 'user',
+                parts: [{ text: userMessage }]
+            });
+
+            const requestBody = {
+                contents: contents,
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024,
+                }
+            };
+
+            console.log('Sending request to Google AI:', requestBody);
+            
+            const response = await fetch(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            console.log('Google AI Response Status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Google AI API Error:', response.status, errorText);
+                throw new Error(`Google AI API Error: ${response.status} - ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Google AI Response Data:', data);
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Invalid response format from Google AI');
+            }
+        }
+
+        function getLocalResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const responses = {
+                ani: [
+                    '와! 그거 정말 재미있네요~ 😊 더 자세히 얘기해주세요!',
+                    '오늘도 즐거운 하루 보내시고 계시는군요! ✨',
+                    '그런 일이 있었군요! 저도 궁금해져요~ 💕'
+                ],
+                yuki: [
+                    '그렇군요... 깊이 생각해볼 만한 이야기네요.',
+                    '조용히 생각해보시는 시간도 필요할 것 같아요.',
+                    '마음이 편안해지길 바라요.'
+                ],
+                kai: [
+                    '흥미로운 질문이네요. 더 자세한 정보가 필요하다면 도움을 드릴 수 있습니다.',
+                    '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
+                    '정확한 정보를 제공하고 싶지만, 더 구체적인 질문이 필요할 것 같아요.'
+                ]
+            };
+            
+            const characterResponses = responses[currentCharacter] || responses.ani;
+            return characterResponses[Math.floor(Math.random() * characterResponses.length)];
+        }
+
+        function addMessage(sender, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const character = characters[currentCharacter];
+            let emoji = sender === 'ai' ? character.emoji : '👤';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${emoji}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            elements.chatMessages.appendChild(messageDiv);
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            elements.typingIndicator.classList.remove('hidden');
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            elements.typingIndicator.classList.add('hidden');
+        }
+
+        function toggleAPI() {
+            useAPI = !useAPI;
+            updateAPIToggle();
+            
+            const statusMessage = useAPI ? 
+                '🤖 OpenAI API 모드가 활성화되었습니다.' : 
+                '💬 로컬 모드로 전환되었습니다.';
+            
+            addMessage('system', statusMessage);
+            
+            // API 연결 테스트
+            if (useAPI) {
+                testAPIConnection();
+            }
+        }
+
+        async function testAPIConnection() {
+            try {
+                console.log('Testing API connection...');
+                addMessage('system', '🔄 API 연결 테스트 중...');
+                
+                const testResponse = await fetch(OPENAI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{ role: 'user', content: 'Hi' }],
+                        max_tokens: 10
+                    })
+                });
+                
+                if (testResponse.ok) {
+                    addMessage('system', '✅ API 연결이 성공적으로 확인되었습니다!');
+                    console.log('API connection test successful');
+                } else {
+                    const errorText = await testResponse.text();
+                    console.error('API connection test failed:', testResponse.status, errorText);
+                    addMessage('system', `❌ API 연결 실패: ${testResponse.status} - ${errorText}`);
+                    
+                    // API 키 문제인지 확인
+                    if (testResponse.status === 401) {
+                        addMessage('system', '🔑 API 키가 유효하지 않습니다. 로컬 모드로 전환됩니다.');
+                        useAPI = false;
+                        updateAPIToggle();
+                    }
+                }
+            } catch (error) {
+                console.error('API connection test error:', error);
+                addMessage('system', `❌ API 연결 테스트 오류: ${error.message}`);
+                useAPI = false;
+                updateAPIToggle();
+            }
+        }textContent = '💬';
+                elements.apiStatusText.textContent = '로컬 모드';
+                elements.apiToggle.style.background = 'linear-gradient(45deg, #fbbf24, #f59e0b)';
+            }
+            
+            addMessage('system', `${useAPI ? 'OpenAI API' : '로컬'} 모드로 전환되었습니다.`);
+        }
+
+        // 대화 기록 관리
+        function saveMessage(userMessage, aiResponse) {
+            if (!conversationHistory[currentCharacter]) {
+                conversationHistory[currentCharacter] = [];
+            }
+            
+            conversationHistory[currentCharacter].push(
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: aiResponse }
+            );
+            
+            // 최근 20개 메시지만 유지
+            if (conversationHistory[currentCharacter].length > 20) {
+                conversationHistory[currentCharacter] = conversationHistory[currentCharacter].slice(-20);
+            }
+            
+            saveConversationHistory();
+        }
+
+        function getConversationHistory() {
+            return conversationHistory[currentCharacter]?.slice(-10) || [];
+        }
+
+        function saveConversationHistory() {
+            if (currentUser) {
+                localStorage.setItem(`ai_companion_history_${currentUser.id}`, JSON.stringify(conversationHistory));
+            }
+        }
+
+        function loadConversationHistory() {
+            if (currentUser) {
+                const saved = localStorage.getItem(`ai_companion_history_${currentUser.id}`);
+                conversationHistory = saved ? JSON.parse(saved) : {};
+            }
+        }
     </script>
 </body>
 </html>
