@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 컴패니언 - 가상 친구와 채팅</title>
     <style>
-        /* AI 컴패니언 채팅 사이트 스타일 */
-
         * {
             margin: 0;
             padding: 0;
@@ -22,12 +20,11 @@
             align-items: center;
         }
 
-        /* 유틸리티 클래스 */
         .hidden {
             display: none !important;
         }
 
-        /* 인증 모달 스타일 */
+        /* 인증 모달 */
         .auth-overlay {
             position: fixed;
             top: 0;
@@ -53,14 +50,8 @@
         }
 
         @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .auth-form h2 {
@@ -94,7 +85,8 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .auth-form button {
+        /* 버튼 스타일 - 클릭 문제 해결 */
+        .auth-button {
             width: 100%;
             padding: 15px;
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -104,16 +96,23 @@
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s ease;
             margin-bottom: 20px;
-            /* 중요: 버튼 클릭 영역 확보 */
+            /* 중요: 클릭 영역 확보 */
             position: relative;
-            z-index: 10;
+            z-index: 999;
+            display: block;
+            text-align: center;
+            user-select: none;
         }
 
-        .auth-form button:hover {
+        .auth-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-button:active {
+            transform: translateY(0);
         }
 
         .error-message {
@@ -129,14 +128,14 @@
             margin-bottom: 15px;
         }
 
-        .auth-form a {
+        .auth-link {
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
             cursor: pointer;
         }
 
-        .auth-form a:hover {
+        .auth-link:hover {
             text-decoration: underline;
         }
 
@@ -154,6 +153,7 @@
             font-size: 14px;
         }
 
+        /* 채팅 화면 */
         .main-container {
             width: 90%;
             max-width: 800px;
@@ -167,11 +167,9 @@
             backdrop-filter: blur(10px);
         }
 
-        /* 헤더 스타일 */
         .header {
             background: linear-gradient(45deg, #ff6b6b, #ffd93d);
             padding: 20px;
-            text-align: center;
             color: white;
         }
 
@@ -186,6 +184,30 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff9a9e 0%, #fecfef 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 3px solid white;
+            transition: transform 0.3s ease;
+        }
+
+        .character-details h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-status {
+            font-size: 14px;
+            opacity: 0.9;
         }
 
         .user-info {
@@ -203,111 +225,35 @@
             border-radius: 15px;
             cursor: pointer;
             font-size: 12px;
-            transition: background 0.3s;
         }
 
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .character-avatar {
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, #ff9a9e 0%, #fecfef 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            border: 3px solid white;
-            transition: transform 0.3s ease;
-        }
-
-        .character-avatar:hover {
-            transform: scale(1.1);
-        }
-
-        .character-details h2 {
-            font-size: 24px;
-            margin-bottom: 5px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .character-status {
-            font-size: 14px;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .character-status::before {
-            content: '●';
-            color: #4ade80;
-            font-size: 12px;
-            animation: pulse 2s infinite;
-        }
-
-        /* 캐릭터 선택기 */
         .character-selector {
             padding: 10px 20px;
             background: rgba(255, 255, 255, 0.9);
             display: flex;
             gap: 10px;
-            overflow-x: auto;
             border-bottom: 1px solid #eee;
         }
 
         .character-option {
             padding: 8px 16px;
             border-radius: 20px;
-            border: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
             background: rgba(255, 255, 255, 0.7);
             font-weight: 500;
-        }
-
-        .character-option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
         }
 
         .character-option.active {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            border-color: transparent;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        /* 채팅 메시지 영역 */
         .chat-messages {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
             background: linear-gradient(to bottom, #f8f9ff 0%, #ffffff 100%);
-            scrollbar-width: thin;
-            scrollbar-color: #ddd transparent;
-        }
-
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #ddd;
-            border-radius: 3px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #bbb;
         }
 
         .welcome-message {
@@ -324,41 +270,15 @@
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
         }
 
-        .welcome-content h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .welcome-content p {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        /* 메시지 스타일 */
         .message {
             margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            animation: fadeInUp 0.3s ease;
         }
 
         .message.user {
             flex-direction: row-reverse;
-        }
-
-        .message.system {
-            justify-content: center;
-        }
-
-        .message.system .message-content {
-            background: #f0f0f0;
-            color: #666;
-            font-size: 14px;
-            font-style: italic;
-            border-radius: 15px;
-            padding: 8px 12px;
         }
 
         .message-avatar {
@@ -370,7 +290,6 @@
             justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
-            border: 2px solid rgba(255, 255, 255, 0.8);
         }
 
         .message.ai .message-avatar {
@@ -383,76 +302,23 @@
             color: white;
         }
 
-        .message.system .message-avatar {
-            background: #f0f0f0;
-            color: #666;
-        }
-
         .message-content {
             max-width: 70%;
             padding: 12px 16px;
             border-radius: 18px;
-            position: relative;
             line-height: 1.5;
-            word-wrap: break-word;
         }
 
         .message.ai .message-content {
             background: white;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            border-bottom-left-radius: 5px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .message.user .message-content {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            border-bottom-right-radius: 5px;
-            box-shadow: 0 2px 15px rgba(102, 126, 234, 0.3);
         }
 
-        /* 타이핑 인디케이터 */
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 3px;
-            padding: 12px 16px;
-            background: white;
-            border-radius: 18px;
-            border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #ff6b6b;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        .typing-text {
-            color: #666;
-            font-size: 14px;
-            font-style: italic;
-        }
-
-        /* 입력 영역 */
         .input-area {
             padding: 20px;
             background: white;
@@ -463,29 +329,6 @@
             display: flex;
             gap: 10px;
             align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .api-toggle {
-            padding: 12px;
-            background: linear-gradient(45deg, #4ade80, #22c55e);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
-        }
-
-        .api-toggle:hover {
-            transform: translateY(-2px) rotate(10deg);
-            box-shadow: 0 6px 20px rgba(74, 222, 128, 0.4);
         }
 
         .message-input {
@@ -495,14 +338,6 @@
             border-radius: 25px;
             outline: none;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .message-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            background: white;
         }
 
         .send-button {
@@ -512,233 +347,78 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
             font-weight: 600;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .send-button:active {
-            transform: translateY(0);
-        }
-
-        .send-button:disabled {
-            opacity: 0.6;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        .api-status-text {
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        /* 애니메이션 */
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-                opacity: 0.4;
-            }
-            30% {
-                transform: translateY(-10px);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-            .auth-modal {
-                padding: 30px 20px;
-                margin: 20px;
-            }
-            
-            .main-container {
-                width: 95%;
-                height: 90vh;
-                margin: 10px;
-            }
-
-            .character-info {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-
-            .character-main {
-                justify-content: center;
-            }
-
-            .user-info {
-                justify-content: center;
-            }
-
-            .character-avatar {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-
-            .character-details h2 {
-                font-size: 20px;
-            }
-
-            .message-content {
-                max-width: 85%;
-            }
-
-            .input-area {
-                padding: 15px;
-            }
-
-            .character-selector {
-                padding: 8px 15px;
-            }
-
-            .character-option {
-                padding: 6px 12px;
-                font-size: 14px;
-            }
-
-            .api-toggle {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .auth-modal {
-                padding: 25px 15px;
-                margin: 15px;
-            }
-            
-            .main-container {
-                height: 95vh;
-                border-radius: 10px;
-            }
-
-            .header {
-                padding: 15px;
-            }
-
-            .chat-messages {
-                padding: 15px;
-            }
-
-            .character-details h2 {
-                font-size: 18px;
-            }
-
-            .character-status {
-                font-size: 12px;
-            }
-
-            .user-info {
-                font-size: 12px;
-            }
-
-            .logout-btn {
-                padding: 6px 12px;
-                font-size: 11px;
-            }
         }
     </style>
 </head>
 <body>
     <!-- 로그인/회원가입 모달 -->
-    <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
             <!-- 로그인 폼 -->
-            <div class="auth-form" id="login-form">
+            <div class="auth-form" id="loginForm">
                 <h2>🤖 AI 컴패니언 로그인</h2>
                 <div class="form-container">
-                    <input type="email" id="login-email" placeholder="📧 이메일" required>
-                    <input type="password" id="login-password" placeholder="🔒 비밀번호" required>
-                    <button type="button" id="login-btn">로그인</button>
-                    <div class="error-message" id="login-error"></div>
+                    <input type="email" id="loginEmail" placeholder="📧 이메일" required>
+                    <input type="password" id="loginPassword" placeholder="🔒 비밀번호" required>
+                    <button class="auth-button" onclick="handleLogin()">로그인</button>
+                    <div class="error-message" id="loginError"></div>
                 </div>
-                <p>계정이 없으신가요? <a href="#" id="show-register">회원가입</a></p>
+                <p>계정이 없으신가요? <span class="auth-link" onclick="showRegisterForm()">회원가입</span></p>
                 <div class="demo-account">
                     <p><small>📌 데모 계정: test@test.com / 1234</small></p>
                 </div>
             </div>
 
             <!-- 회원가입 폼 -->
-            <div class="auth-form hidden" id="register-form">
+            <div class="auth-form hidden" id="registerForm">
                 <h2>🌟 AI 컴패니언 회원가입</h2>
                 <div class="form-container">
-                    <input type="text" id="register-nickname" placeholder="👤 닉네임" required maxlength="10">
-                    <input type="email" id="register-email" placeholder="📧 이메일" required>
-                    <input type="password" id="register-password" placeholder="🔒 비밀번호" required minlength="4">
-                    <input type="password" id="register-confirm" placeholder="🔒 비밀번호 확인" required>
-                    <button type="button" id="register-btn">회원가입</button>
-                    <div class="error-message" id="register-error"></div>
+                    <input type="text" id="registerNickname" placeholder="👤 닉네임" required maxlength="10">
+                    <input type="email" id="registerEmail" placeholder="📧 이메일" required>
+                    <input type="password" id="registerPassword" placeholder="🔒 비밀번호" required minlength="4">
+                    <input type="password" id="registerConfirm" placeholder="🔒 비밀번호 확인" required>
+                    <button class="auth-button" onclick="handleRegister()">회원가입</button>
+                    <div class="error-message" id="registerError"></div>
                 </div>
-                <p>이미 계정이 있으신가요? <a href="#" id="show-login">로그인</a></p>
+                <p>이미 계정이 있으신가요? <span class="auth-link" onclick="showLoginForm()">로그인</span></p>
             </div>
         </div>
     </div>
 
     <!-- 메인 채팅 화면 -->
-    <div class="main-container hidden" id="main-container">
+    <div class="main-container hidden" id="mainContainer">
         <div class="header">
             <div class="character-info">
                 <div class="character-main">
                     <div class="character-avatar">
-                        <span id="character-emoji">👧</span>
+                        <span id="characterEmoji">👧</span>
                     </div>
                     <div class="character-details">
-                        <h2 id="character-name">Ani</h2>
-                        <div class="character-status" id="character-status">온라인 • 친절한 AI 컴패니언</div>
+                        <h2 id="characterName">Ani</h2>
+                        <div class="character-status" id="characterStatus">온라인 • 친절한 AI 컴패니언</div>
                     </div>
                 </div>
                 <div class="user-info">
-                    <span id="user-nickname">사용자</span>
-                    <button class="logout-btn" id="logout-btn">로그아웃</button>
+                    <span id="userNickname">사용자</span>
+                    <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
                 </div>
             </div>
         </div>
 
         <div class="character-selector">
-            <div class="character-option active" data-character="ani">
+            <div class="character-option active" onclick="switchCharacter('ani')">
                 👧 Ani (활발한 소녀)
             </div>
-            <div class="character-option" data-character="yuki">
+            <div class="character-option" onclick="switchCharacter('yuki')">
                 ❄️ Yuki (차분한 친구)
             </div>
-            <div class="character-option" data-character="kai">
+            <div class="character-option" onclick="switchCharacter('kai')">
                 🤖 Kai (똑똑한 조수)
             </div>
         </div>
 
-        <div class="chat-messages" id="chat-messages">
+        <div class="chat-messages" id="chatMessages">
             <div class="welcome-message">
                 <div class="welcome-content">
                     <h3>🎉 AI 컴패니언에 오신 것을 환영합니다!</h3>
@@ -747,25 +427,11 @@
             </div>
         </div>
 
-        <div class="typing-indicator" id="typing-indicator">
-            <div class="message-avatar">👧</div>
-            <div class="typing-dots">
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            </div>
-            <span class="typing-text">응답 중...</span>
-        </div>
-
         <div class="input-area">
             <div class="input-controls">
-                <button class="api-toggle" id="api-toggle" title="Google AI 모드">
-                    <span class="api-status">🤖</span>
-                </button>
-                <input type="text" class="message-input" id="message-input" placeholder="메시지를 입력하세요..." maxlength="500">
-                <button class="send-button" id="send-button">전송</button>
+                <input type="text" class="message-input" id="messageInput" placeholder="메시지를 입력하세요..." maxlength="500" onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="send-button" onclick="sendMessage()">전송</button>
             </div>
-            <div class="api-status-text" id="api-status-text">Google AI 연결됨</div>
         </div>
     </div>
 
@@ -773,46 +439,33 @@
         // 전역 변수
         let currentUser = null;
         let currentCharacter = 'ani';
-        let useAPI = true;
-        let conversationHistory = {};
         
-        // Google AI API 설정
-        const GOOGLE_API_KEY = 'AIzaSyAOxpnkAq7nJhdR1FvIm_fkxE4jiSBmEsQ';
-        const GOOGLE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
-
         // 캐릭터 설정
         const characters = {
             ani: {
                 name: 'Ani',
                 emoji: '👧',
                 greeting: '안녕하세요! 저는 Ani예요~ 🌸 오늘 하루는 어떠셨나요? 재미있는 얘기 나눠봐요! 💕',
-                systemPrompt: '너는 활발하고 귀여운 일본 애니메이션 소녀 캐릭터 "Ani"야. 항상 밝고 긍정적이며, 이모지를 자주 사용해. 한국어로 대화하고, 친근하고 장난기 있는 말투를 써. 사용자를 친구처럼 대해. 대답은 2-3문장으로 간결하게.',
                 status: '온라인 • 활발한 소녀'
             },
             yuki: {
                 name: 'Yuki',
                 emoji: '❄️',
                 greeting: '안녕하세요. 저는 Yuki입니다 ❄️ 조용한 대화를 나누면서 편안한 시간을 보내요.',
-                systemPrompt: '너는 차분하고 지적인 캐릭터 "Yuki"야. 조용하고 사려깊은 성격이며, 깊이 있는 대화를 좋아해. 한국어로 정중하고 부드러운 말투로 대화해. 철학적이고 감성적인 면이 있어. 대답은 차분하고 생각깊게.',
                 status: '온라인 • 차분한 친구'
             },
             kai: {
                 name: 'Kai',
                 emoji: '🤖',
                 greeting: '안녕하세요! Kai입니다 🤖 궁금한 것이 있으시면 언제든 물어보세요!',
-                systemPrompt: '너는 똑똑하고 도움이 되는 AI 어시스턴트 "Kai"야. 정확한 정보를 제공하고, 논리적으로 생각하며, 사용자의 질문에 친절하게 답변해. 한국어로 정중하되 친근한 말투를 써. 전문적이지만 따뜻해.',
                 status: '온라인 • 똑똑한 조수'
             }
         };
 
-        // DOM 로드 후 초기화
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM 로드 완료');
-            initializeApp();
-            bindAllEvents();
-        });
-
-        function initializeApp() {
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            console.log('페이지 로드 완료');
+            
             // 저장된 사용자 확인
             const savedUser = localStorage.getItem('ai_companion_user');
             if (savedUser) {
@@ -820,151 +473,29 @@
                     currentUser = JSON.parse(savedUser);
                     showMainApp();
                 } catch (error) {
-                    console.error('사용자 데이터 파싱 오류:', error);
+                    console.error('사용자 데이터 오류:', error);
                     localStorage.removeItem('ai_companion_user');
                     showAuthModal();
                 }
             } else {
                 showAuthModal();
             }
-            
-            loadConversationHistory();
-        }
-
-        function bindAllEvents() {
-            console.log('이벤트 바인딩 시작');
-            
-            // 폼 전환 링크
-            const showRegisterLink = document.getElementById('show-register');
-            const showLoginLink = document.getElementById('show-login');
-            
-            if (showRegisterLink) {
-                showRegisterLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('회원가입 폼 표시');
-                    showRegisterForm();
-                });
-            }
-            
-            if (showLoginLink) {
-                showLoginLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('로그인 폼 표시');
-                    showLoginForm();
-                });
-            }
-            
-            // 버튼 이벤트
-            const loginBtn = document.getElementById('login-btn');
-            const registerBtn = document.getElementById('register-btn');
-            
-            if (loginBtn) {
-                loginBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('로그인 버튼 클릭됨');
-                    handleLogin();
-                });
-            }
-            
-            if (registerBtn) {
-                registerBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('회원가입 버튼 클릭됨');
-                    handleRegister();
-                });
-            }
-            
-            // Enter 키 이벤트
-            const loginPassword = document.getElementById('login-password');
-            const registerConfirm = document.getElementById('register-confirm');
-            
-            if (loginPassword) {
-                loginPassword.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleLogin();
-                    }
-                });
-            }
-            
-            if (registerConfirm) {
-                registerConfirm.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleRegister();
-                    }
-                });
-            }
-            
-            // 채팅 관련 이벤트
-            const sendButton = document.getElementById('send-button');
-            const messageInput = document.getElementById('message-input');
-            const logoutBtn = document.getElementById('logout-btn');
-            const apiToggle = document.getElementById('api-toggle');
-            
-            if (sendButton) {
-                sendButton.addEventListener('click', sendMessage);
-            }
-            
-            if (messageInput) {
-                messageInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                });
-            }
-            
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    handleLogout();
-                });
-            }
-            
-            if (apiToggle) {
-                apiToggle.addEventListener('click', toggleAPI);
-            }
-            
-            // 캐릭터 선택 이벤트
-            const characterOptions = document.querySelectorAll('.character-option');
-            characterOptions.forEach(function(option) {
-                option.addEventListener('click', function(e) {
-                    const character = e.target.getAttribute('data-character');
-                    if (character) {
-                        switchCharacter(character);
-                    }
-                });
-            });
-            
-            console.log('모든 이벤트 바인딩 완료');
-        }
+        };
 
         // 화면 전환 함수들
         function showAuthModal() {
             console.log('인증 모달 표시');
-            const authOverlay = document.getElementById('auth-overlay');
-            const mainContainer = document.getElementById('main-container');
-            
-            if (authOverlay) authOverlay.classList.remove('hidden');
-            if (mainContainer) mainContainer.classList.add('hidden');
+            document.getElementById('authOverlay').classList.remove('hidden');
+            document.getElementById('mainContainer').classList.add('hidden');
         }
 
         function showMainApp() {
             console.log('메인 앱 표시');
-            const authOverlay = document.getElementById('auth-overlay');
-            const mainContainer = document.getElementById('main-container');
-            
-            if (authOverlay) authOverlay.classList.add('hidden');
-            if (mainContainer) mainContainer.classList.remove('hidden');
+            document.getElementById('authOverlay').classList.add('hidden');
+            document.getElementById('mainContainer').classList.remove('hidden');
             
             if (currentUser) {
-                const userNickname = document.getElementById('user-nickname');
-                if (userNickname) userNickname.textContent = currentUser.nickname;
+                document.getElementById('userNickname').textContent = currentUser.nickname;
             }
             
             initializeChat();
@@ -972,56 +503,33 @@
 
         function showRegisterForm() {
             console.log('회원가입 폼 표시');
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            
-            if (loginForm) loginForm.classList.add('hidden');
-            if (registerForm) registerForm.classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
             clearErrors();
-            
-            setTimeout(function() {
-                const nicknameInput = document.getElementById('register-nickname');
-                if (nicknameInput) nicknameInput.focus();
-            }, 100);
+            setTimeout(() => document.getElementById('registerNickname').focus(), 100);
         }
 
         function showLoginForm() {
             console.log('로그인 폼 표시');
-            const registerForm = document.getElementById('register-form');
-            const loginForm = document.getElementById('login-form');
-            
-            if (registerForm) registerForm.classList.add('hidden');
-            if (loginForm) loginForm.classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
             clearErrors();
-            
-            setTimeout(function() {
-                const emailInput = document.getElementById('login-email');
-                if (emailInput) emailInput.focus();
-            }, 100);
+            setTimeout(() => document.getElementById('loginEmail').focus(), 100);
         }
 
         function clearErrors() {
-            const loginError = document.getElementById('login-error');
-            const registerError = document.getElementById('register-error');
-            
-            if (loginError) loginError.textContent = '';
-            if (registerError) registerError.textContent = '';
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('registerError').textContent = '';
         }
 
-        // 인증 처리 함수들
+        // 로그인 처리
         function handleLogin() {
             console.log('로그인 처리 시작');
             
-            const emailInput = document.getElementById('login-email');
-            const passwordInput = document.getElementById('login-password');
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
             
-            if (!emailInput || !passwordInput) {
-                showError('login', '입력 필드를 찾을 수 없습니다.');
-                return;
-            }
-            
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
+            console.log('로그인 시도:', email);
             
             if (!email || !password) {
                 showError('login', '이메일과 비밀번호를 입력해주세요.');
@@ -1047,28 +555,21 @@
             
             showSuccess('login', '로그인 성공!');
             
-            setTimeout(function() {
+            setTimeout(() => {
                 showMainApp();
             }, 1000);
         }
 
+        // 회원가입 처리
         function handleRegister() {
             console.log('회원가입 처리 시작');
             
-            const nicknameInput = document.getElementById('register-nickname');
-            const emailInput = document.getElementById('register-email');
-            const passwordInput = document.getElementById('register-password');
-            const confirmInput = document.getElementById('register-confirm');
+            const nickname = document.getElementById('registerNickname').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirm').value;
             
-            if (!nicknameInput || !emailInput || !passwordInput || !confirmInput) {
-                showError('register', '입력 필드를 찾을 수 없습니다.');
-                return;
-            }
-            
-            const nickname = nicknameInput.value.trim();
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            const confirmPassword = confirmInput.value;
+            console.log('회원가입 시도:', nickname, email);
             
             if (!nickname || !email || !password || !confirmPassword) {
                 showError('register', '모든 필드를 입력해주세요.');
@@ -1118,47 +619,40 @@
             
             showSuccess('register', '회원가입이 완료되었습니다!');
             
-            setTimeout(function() {
+            setTimeout(() => {
                 showMainApp();
             }, 1500);
         }
 
+        // 로그아웃 처리
         function handleLogout() {
             currentUser = null;
             localStorage.removeItem('ai_companion_user');
-            conversationHistory = {};
-            
-            const chatMessages = document.getElementById('chat-messages');
-            const messageInput = document.getElementById('message-input');
-            
-            if (chatMessages) chatMessages.innerHTML = '';
-            if (messageInput) messageInput.value = '';
-            
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('messageInput').value = '';
             showAuthModal();
         }
 
+        // 메시지 표시 함수들
         function showError(type, message) {
             const errorElement = type === 'login' ? 
-                document.getElementById('login-error') : 
-                document.getElementById('register-error');
+                document.getElementById('loginError') : 
+                document.getElementById('registerError');
             
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.color = '#ff4757';
-            }
+            errorElement.textContent = message;
+            errorElement.style.color = '#ff4757';
         }
 
         function showSuccess(type, message) {
             const errorElement = type === 'login' ? 
-                document.getElementById('login-error') : 
-                document.getElementById('register-error');
+                document.getElementById('loginError') : 
+                document.getElementById('registerError');
             
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.style.color = '#2ed573';
-            }
+            errorElement.textContent = message;
+            errorElement.style.color = '#2ed573';
         }
 
+        // 유틸리티 함수들
         function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
@@ -1173,17 +667,10 @@
             return hash.toString();
         }
 
-        // 채팅 시스템
+        // 채팅 기능들
         function initializeChat() {
-            addWelcomeMessage();
-            if (useAPI) {
-                testGoogleAPIConnection();
-            }
-        }
-
-        function addWelcomeMessage() {
             const character = characters[currentCharacter];
-            setTimeout(function() {
+            setTimeout(() => {
                 addMessage('ai', character.greeting);
             }, 500);
         }
@@ -1192,338 +679,71 @@
             currentCharacter = characterKey;
             const character = characters[characterKey];
             
-            const characterName = document.getElementById('character-name');
-            const characterEmoji = document.getElementById('character-emoji');
-            const characterStatus = document.getElementById('character-status');
+            document.getElementById('characterName').textContent = character.name;
+            document.getElementById('characterEmoji').textContent = character.emoji;
+            document.getElementById('characterStatus').textContent = character.status;
             
-            if (characterName) characterName.textContent = character.name;
-            if (characterEmoji) characterEmoji.textContent = character.emoji;
-            if (characterStatus) characterStatus.textContent = character.status;
-            
-            const characterOptions = document.querySelectorAll('.character-option');
-            characterOptions.forEach(function(opt) {
-                opt.classList.remove('active');
-            });
-            
-            const selectedOption = document.querySelector('[data-character="' + characterKey + '"]');
-            if (selectedOption) selectedOption.classList.add('active');
-            
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) {
-                const avatar = typingIndicator.querySelector('.message-avatar');
-                if (avatar) avatar.textContent = character.emoji;
-            }
+            // 활성 캐릭터 표시 업데이트
+            document.querySelectorAll('.character-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
             
             addMessage('ai', character.greeting);
         }
 
         function sendMessage() {
-            const messageInput = document.getElementById('message-input');
-            if (!messageInput) return;
-            
+            const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
+            
             if (!message) return;
             
             addMessage('user', message);
             messageInput.value = '';
             
-            processAIResponse(message);
-        }
-
-        function processAIResponse(userMessage) {
-            showTypingIndicator();
-            
-            try {
-                if (useAPI) {
-                    console.log('Google AI 모드 사용');
-                    addMessage('system', '🤖 Google AI 호출 중...');
-                    
-                    getGoogleAIResponse(userMessage)
-                        .then(function(response) {
-                            console.log('Google AI 응답 받음:', response);
-                            hideTypingIndicator();
-                            addMessage('ai', response);
-                            saveMessage(userMessage, response);
-                        })
-                        .catch(function(error) {
-                            console.error('API 오류:', error);
-                            hideTypingIndicator();
-                            
-                            const errorMessage = 'Google AI API 오류: ' + error.message;
-                            addMessage('system', errorMessage);
-                            
-                            const fallbackResponse = getLocalResponse(userMessage) + ' (오프라인 모드로 전환)';
-                            addMessage('ai', fallbackResponse);
-                            
-                            useAPI = false;
-                            updateAPIToggle();
-                        });
-                } else {
-                    console.log('로컬 모드 사용');
-                    const response = getLocalResponse(userMessage);
-                    
-                    setTimeout(function() {
-                        hideTypingIndicator();
-                        addMessage('ai', response);
-                        saveMessage(userMessage, response);
-                    }, 1000);
-                }
-            } catch (error) {
-                console.error('AI 응답 처리 오류:', error);
-                hideTypingIndicator();
-                addMessage('ai', '오류가 발생했습니다. 다시 시도해주세요.');
-            }
-        }
-
-        function getGoogleAIResponse(userMessage) {
-            const character = characters[currentCharacter];
-            const history = getConversationHistory();
-            
-            const contents = [];
-            
-            contents.push({
-                role: 'user',
-                parts: [{ text: character.systemPrompt }]
-            });
-            contents.push({
-                role: 'model',
-                parts: [{ text: '네, 이해했습니다. 해당 캐릭터로 역할을 수행하겠습니다.' }]
-            });
-            
-            history.forEach(function(msg) {
-                contents.push({
-                    role: msg.role === 'assistant' ? 'model' : 'user',
-                    parts: [{ text: msg.content }]
-                });
-            });
-            
-            contents.push({
-                role: 'user',
-                parts: [{ text: userMessage }]
-            });
-
-            const requestBody = {
-                contents: contents,
-                generationConfig: {
-                    temperature: 0.9,
-                    topK: 40,
-                    topP: 0.95,
-                    maxOutputTokens: 1024
-                }
-            };
-
-            console.log('Google AI 요청 전송:', requestBody);
-            
-            return fetch(GOOGLE_API_URL + '?key=' + GOOGLE_API_KEY, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            })
-            .then(function(response) {
-                console.log('Google AI 응답 상태:', response.status);
+            // 간단한 응답 생성
+            setTimeout(() => {
+                const responses = {
+                    ani: [
+                        '와! 그거 정말 재미있네요~ 😊',
+                        '오늘도 즐거운 하루 보내세요! ✨',
+                        '저도 그런 생각이에요! 💕'
+                    ],
+                    yuki: [
+                        '그렇군요... 깊이 생각해볼 만한 이야기네요.',
+                        '조용히 생각해보는 시간도 필요해요.',
+                        '마음이 편안해지길 바라요.'
+                    ],
+                    kai: [
+                        '흥미로운 질문이네요. 더 도움이 필요하면 말씀해주세요.',
+                        '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
+                        '더 구체적인 정보가 있으면 더 정확한 답변을 드릴 수 있어요.'
+                    ]
+                };
                 
-                if (!response.ok) {
-                    return response.text().then(function(errorText) {
-                        console.error('Google AI API 오류:', response.status, errorText);
-                        throw new Error('Google AI API Error: ' + response.status + ' - ' + errorText);
-                    });
-                }
-                
-                return response.json();
-            })
-            .then(function(data) {
-                console.log('Google AI 응답 데이터:', data);
-                
-                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-                    return data.candidates[0].content.parts[0].text;
-                } else {
-                    throw new Error('Invalid response format from Google AI');
-                }
-            });
-        }
-
-        function getLocalResponse(userMessage) {
-            const character = characters[currentCharacter];
-            const responses = {
-                ani: [
-                    '와! 그거 정말 재미있네요~ 😊 더 자세히 얘기해주세요!',
-                    '오늘도 즐거운 하루 보내시고 계시는군요! ✨',
-                    '그런 일이 있었군요! 저도 궁금해져요~ 💕'
-                ],
-                yuki: [
-                    '그렇군요... 깊이 생각해볼 만한 이야기네요.',
-                    '조용히 생각해보시는 시간도 필요할 것 같아요.',
-                    '마음이 편안해지길 바라요.'
-                ],
-                kai: [
-                    '흥미로운 질문이네요. 더 자세한 정보가 필요하다면 도움을 드릴 수 있습니다.',
-                    '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
-                    '정확한 정보를 제공하고 싶지만, 더 구체적인 질문이 필요할 것 같아요.'
-                ]
-            };
-            
-            const characterResponses = responses[currentCharacter] || responses.ani;
-            return characterResponses[Math.floor(Math.random() * characterResponses.length)];
+                const characterResponses = responses[currentCharacter];
+                const randomResponse = characterResponses[Math.floor(Math.random() * characterResponses.length)];
+                addMessage('ai', randomResponse);
+            }, 1000);
         }
 
         function addMessage(sender, content) {
-            const chatMessages = document.getElementById('chat-messages');
-            if (!chatMessages) return;
+            const chatMessages = document.getElementById('chatMessages');
             
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message ' + sender;
             
             const character = characters[currentCharacter];
             let emoji = sender === 'ai' ? character.emoji : '👤';
-            if (sender === 'system') emoji = '⚙️';
             
-            messageDiv.innerHTML = '<div class="message-avatar">' + emoji + '</div>' +
-                                  '<div class="message-content">' + content + '</div>';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${emoji}</div>
+                <div class="message-content">${content}</div>
+            `;
             
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function showTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) {
-                typingIndicator.style.display = 'flex';
-                const chatMessages = document.getElementById('chat-messages');
-                if (chatMessages) {
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-            }
-        }
-
-        function hideTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) {
-                typingIndicator.style.display = 'none';
-            }
-        }
-
-        function toggleAPI() {
-            useAPI = !useAPI;
-            updateAPIToggle();
-            
-            const statusMessage = useAPI ? 
-                '🤖 Google AI 모드가 활성화되었습니다.' : 
-                '💬 로컬 모드로 전환되었습니다.';
-            
-            addMessage('system', statusMessage);
-            
-            if (useAPI) {
-                testGoogleAPIConnection();
-            }
-        }
-
-        function updateAPIToggle() {
-            const apiToggle = document.getElementById('api-toggle');
-            const apiStatusText = document.getElementById('api-status-text');
-            
-            if (!apiToggle || !apiStatusText) return;
-            
-            const apiStatus = apiToggle.querySelector('.api-status');
-            if (!apiStatus) return;
-            
-            if (useAPI) {
-                apiStatus.textContent = '🤖';
-                apiStatusText.textContent = 'Google AI 연결됨';
-                apiToggle.style.background = 'linear-gradient(45deg, #4ade80, #22c55e)';
-                apiToggle.title = 'Google AI 모드 (활성)';
-            } else {
-                apiStatus.textContent = '💬';
-                apiStatusText.textContent = '로컬 모드 (오프라인)';
-                apiToggle.style.background = 'linear-gradient(45deg, #fbbf24, #f59e0b)';
-                apiToggle.title = '로컬 모드 (API 비활성)';
-            }
-        }
-
-        function testGoogleAPIConnection() {
-            console.log('Google AI API 연결 테스트 중...');
-            addMessage('system', '🔄 Google AI 연결 테스트 중...');
-            
-            fetch(GOOGLE_API_URL + '?key=' + GOOGLE_API_KEY, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        role: 'user',
-                        parts: [{ text: '안녕하세요' }]
-                    }],
-                    generationConfig: {
-                        maxOutputTokens: 50
-                    }
-                })
-            })
-            .then(function(response) {
-                if (response.ok) {
-                    return response.json().then(function(data) {
-                        if (data.candidates && data.candidates[0]) {
-                            addMessage('system', '✅ Google AI 연결이 성공적으로 확인되었습니다!');
-                            console.log('Google AI 연결 테스트 성공');
-                        } else {
-                            addMessage('system', '⚠️ Google AI 응답 형식에 문제가 있습니다.');
-                        }
-                    });
-                } else {
-                    return response.text().then(function(errorText) {
-                        console.error('Google AI 연결 테스트 실패:', response.status, errorText);
-                        addMessage('system', '❌ Google AI 연결 실패: ' + response.status);
-                        
-                        if (response.status === 400 || response.status === 403) {
-                            addMessage('system', '🔑 API 키가 유효하지 않거나 권한이 없습니다. 로컬 모드로 전환됩니다.');
-                            useAPI = false;
-                            updateAPIToggle();
-                        }
-                    });
-                }
-            })
-            .catch(function(error) {
-                console.error('Google AI 연결 테스트 오류:', error);
-                addMessage('system', '❌ Google AI 연결 테스트 오류: ' + error.message);
-                useAPI = false;
-                updateAPIToggle();
-            });
-        }
-
-        // 대화 기록 관리
-        function saveMessage(userMessage, aiResponse) {
-            if (!conversationHistory[currentCharacter]) {
-                conversationHistory[currentCharacter] = [];
-            }
-            
-            conversationHistory[currentCharacter].push(
-                { role: 'user', content: userMessage },
-                { role: 'assistant', content: aiResponse }
-            );
-            
-            if (conversationHistory[currentCharacter].length > 20) {
-                conversationHistory[currentCharacter] = conversationHistory[currentCharacter].slice(-20);
-            }
-            
-            saveConversationHistory();
-        }
-
-        function getConversationHistory() {
-            return conversationHistory[currentCharacter] ? conversationHistory[currentCharacter].slice(-10) : [];
-        }
-
-        function saveConversationHistory() {
-            if (currentUser) {
-                localStorage.setItem('ai_companion_history_' + currentUser.id, JSON.stringify(conversationHistory));
-            }
-        }
-
-        function loadConversationHistory() {
-            if (currentUser) {
-                const saved = localStorage.getItem('ai_companion_history_' + currentUser.id);
-                conversationHistory = saved ? JSON.parse(saved) : {};
-            }
-        }
-
         console.log('AI Companion 스크립트 로드 완료');
+    </script>
+</body>
+</html>
