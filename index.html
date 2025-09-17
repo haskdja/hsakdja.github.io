@@ -340,14 +340,47 @@
             font-size: 16px;
         }
 
-        .send-button {
-            padding: 12px 20px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
+        .message.system {
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .message.system .message-content {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            font-size: 14px;
+            font-style: italic;
+            border-radius: 15px;
+            padding: 8px 12px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        /* 타이핑 인디케이터 애니메이션 */
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -471,6 +504,7 @@
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
+                    loadConversationHistory();
                     showMainApp();
                 } catch (error) {
                     console.error('사용자 데이터 오류:', error);
@@ -480,7 +514,55 @@
             } else {
                 showAuthModal();
             }
+            
+            // API 연결 테스트
+            if (useAPI) {
+                testGoogleAPIConnection();
+            }
         };
+
+        function testGoogleAPIConnection() {
+            console.log('Google AI API 연결 테스트 중...');
+            
+            fetch(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: '안녕하세요' }]
+                    }],
+                    generationConfig: {
+                        maxOutputTokens: 50
+                    }
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json().then(data => {
+                        if (data.candidates && data.candidates[0]) {
+                            console.log('✅ Google AI 연결 성공!');
+                        } else {
+                            console.log('⚠️ Google AI 응답 형식 문제');
+                        }
+                    });
+                } else {
+                    return response.text().then(errorText => {
+                        console.error('❌ Google AI 연결 실패:', response.status, errorText);
+                        if (response.status === 400 || response.status === 403) {
+                            console.log('API 키가 유효하지 않습니다. 로컬 모드로 전환됩니다.');
+                            useAPI = false;
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('❌ Google AI 연결 오류:', error);
+                useAPI = false;
+            });
+        }
 
         // 화면 전환 함수들
         function showAuthModal() {
@@ -690,6 +772,18 @@
             addMessage('ai', character.greeting);
         }
 
+        // Google AI API 설정
+        const GOOGLE_API_KEY = 'AIzaSyAOxpnkAq7nJhdR1FvIm_fkxE4jiSBmEsQ';
+        const GOOGLE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+        
+        let useAPI = true;
+        let conversationHistory = {};
+
+        // 캐릭터 시스템 프롬프트 추가
+        characters.ani.systemPrompt = '너는 활발하고 귀여운 일본 애니메이션 소녀 캐릭터 "Ani"야. 항상 밝고 긍정적이며, 이모지를 자주 사용해. 한국어로 대화하고, 친근하고 장난기 있는 말투를 써. 사용자를 친구처럼 대해. 대답은 2-3문장으로 간결하게.';
+        characters.yuki.systemPrompt = '너는 차분하고 지적인 캐릭터 "Yuki"야. 조용하고 사려깊은 성격이며, 깊이 있는 대화를 좋아해. 한국어로 정중하고 부드러운 말투로 대화해. 철학적이고 감성적인 면이 있어. 대답은 차분하고 생각깊게.';
+        characters.kai.systemPrompt = '너는 똑똑하고 도움이 되는 AI 어시스턴트 "Kai"야. 정확한 정보를 제공하고, 논리적으로 생각하며, 사용자의 질문에 친절하게 답변해. 한국어로 정중하되 친근한 말투를 써. 전문적이지만 따뜻해.';
+
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
@@ -699,30 +793,184 @@
             addMessage('user', message);
             messageInput.value = '';
             
-            // 간단한 응답 생성
-            setTimeout(() => {
-                const responses = {
-                    ani: [
-                        '와! 그거 정말 재미있네요~ 😊',
-                        '오늘도 즐거운 하루 보내세요! ✨',
-                        '저도 그런 생각이에요! 💕'
-                    ],
-                    yuki: [
-                        '그렇군요... 깊이 생각해볼 만한 이야기네요.',
-                        '조용히 생각해보는 시간도 필요해요.',
-                        '마음이 편안해지길 바라요.'
-                    ],
-                    kai: [
-                        '흥미로운 질문이네요. 더 도움이 필요하면 말씀해주세요.',
-                        '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
-                        '더 구체적인 정보가 있으면 더 정확한 답변을 드릴 수 있어요.'
-                    ]
-                };
-                
-                const characterResponses = responses[currentCharacter];
-                const randomResponse = characterResponses[Math.floor(Math.random() * characterResponses.length)];
-                addMessage('ai', randomResponse);
-            }, 1000);
+            // 타이핑 인디케이터 표시
+            showTypingIndicator();
+            
+            if (useAPI) {
+                // Google AI API 사용
+                getGoogleAIResponse(message)
+                    .then(response => {
+                        hideTypingIndicator();
+                        addMessage('ai', response);
+                        saveMessage(message, response);
+                    })
+                    .catch(error => {
+                        console.error('API 오류:', error);
+                        hideTypingIndicator();
+                        addMessage('system', 'API 오류가 발생했습니다. 로컬 모드로 전환합니다.');
+                        useAPI = false;
+                        // 로컬 응답으로 폴백
+                        const fallbackResponse = getLocalResponse(message);
+                        addMessage('ai', fallbackResponse);
+                    });
+            } else {
+                // 로컬 응답 사용
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const response = getLocalResponse(message);
+                    addMessage('ai', response);
+                }, 1000);
+            }
+        }
+
+        async function getGoogleAIResponse(userMessage) {
+            const character = characters[currentCharacter];
+            const history = getConversationHistory();
+            
+            const contents = [];
+            
+            // 시스템 프롬프트 추가
+            contents.push({
+                role: 'user',
+                parts: [{ text: character.systemPrompt }]
+            });
+            contents.push({
+                role: 'model',
+                parts: [{ text: '네, 이해했습니다. 해당 캐릭터로 역할을 수행하겠습니다.' }]
+            });
+            
+            // 대화 히스토리 추가
+            history.forEach(msg => {
+                contents.push({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                });
+            });
+            
+            // 현재 사용자 메시지 추가
+            contents.push({
+                role: 'user',
+                parts: [{ text: userMessage }]
+            });
+
+            const requestBody = {
+                contents: contents,
+                generationConfig: {
+                    temperature: 0.9,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 1024
+                }
+            };
+
+            console.log('Google AI 요청 전송');
+            
+            const response = await fetch(`${GOOGLE_API_URL}?key=${GOOGLE_API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Google AI API 오류:', response.status, errorText);
+                throw new Error(`API Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Google AI 응답 받음');
+            
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error('Invalid response format');
+            }
+        }
+
+        function getLocalResponse(userMessage) {
+            const responses = {
+                ani: [
+                    '와! 그거 정말 재미있네요~ 😊 더 자세히 얘기해주세요!',
+                    '오늘도 즐거운 하루 보내세요! ✨',
+                    '저도 그런 생각이에요! 💕'
+                ],
+                yuki: [
+                    '그렇군요... 깊이 생각해볼 만한 이야기네요.',
+                    '조용히 생각해보는 시간도 필요해요.',
+                    '마음이 편안해지길 바라요.'
+                ],
+                kai: [
+                    '흥미로운 질문이네요. 더 도움이 필요하면 말씀해주세요.',
+                    '논리적으로 접근해보면 좋은 해결책을 찾을 수 있을 것 같습니다.',
+                    '더 구체적인 정보가 있으면 더 정확한 답변을 드릴 수 있어요.'
+                ]
+            };
+            
+            const characterResponses = responses[currentCharacter];
+            return characterResponses[Math.floor(Math.random() * characterResponses.length)];
+        }
+
+        function showTypingIndicator() {
+            const character = characters[currentCharacter];
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">${character.emoji}</div>
+                <div class="message-content">
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <span style="margin-left: 8px; color: #666; font-style: italic;">응답 중...</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // 대화 기록 관리
+        function saveMessage(userMessage, aiResponse) {
+            if (!conversationHistory[currentCharacter]) {
+                conversationHistory[currentCharacter] = [];
+            }
+            
+            conversationHistory[currentCharacter].push(
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: aiResponse }
+            );
+            
+            // 최근 10개 메시지만 유지
+            if (conversationHistory[currentCharacter].length > 20) {
+                conversationHistory[currentCharacter] = conversationHistory[currentCharacter].slice(-20);
+            }
+            
+            // 로컬 스토리지에 저장
+            if (currentUser) {
+                localStorage.setItem(`ai_companion_history_${currentUser.id}`, JSON.stringify(conversationHistory));
+            }
+        }
+
+        function getConversationHistory() {
+            return conversationHistory[currentCharacter] ? conversationHistory[currentCharacter].slice(-10) : [];
+        }
+
+        function loadConversationHistory() {
+            if (currentUser) {
+                const saved = localStorage.getItem(`ai_companion_history_${currentUser.id}`);
+                conversationHistory = saved ? JSON.parse(saved) : {};
+            }
         }
 
         function addMessage(sender, content) {
